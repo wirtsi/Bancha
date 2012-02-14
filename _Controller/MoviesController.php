@@ -1,7 +1,7 @@
 <?php
     class MoviesController extends AppController {
 
-        var $name = 'Countries';
+        var $name = 'Movies';
 
         public function index() {
             $this->Movie->recursive = 0;

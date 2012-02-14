@@ -1,7 +1,7 @@
 <?php
     class ActorsController extends AppController {
 
-        var $name = 'Countries';
+        var $name = 'Actors';
 
         public function index() {
             $this->Actor->recursive = 0;

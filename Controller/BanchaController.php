@@ -69,10 +69,12 @@ class BanchaController extends BanchaAppController {
 		
 		$remotableModels = $banchaApi->getRemotableModels();
         $metadataModels = $banchaApi->filterRemotableModels($remotableModels, $metadataFilter);
+        $remoteStubs = Configure::read('Bancha.Api.stubsNamespace');
+        if (!$remoteStubs) $remoteStubs = "Bancha.RemoteStubs";
 		
 		$api = array(
 			'url'		=> $this->request->webroot.'bancha.php',
-			'namespace'	=> Configure::read('Bancha.Api.stubsNamespace'),
+			'namespace'	=> $remoteStubs,
     		'type'		=> 'remoting',
     		'metadata'	=> $banchaApi->getMetadata($metadataModels),
     		'actions'	=> array_merge_recursive(

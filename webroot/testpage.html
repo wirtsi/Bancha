@@ -44,32 +44,187 @@
     Ext.onReady(function () {
         // when Bancha is ready, the model meta data is loaded
         // from the server and the model is created....
-        Bancha.onModelReady(['Movie','Actor','Director'], function (userModel) {
+        /**
+         * FactoryPanel is the Factory for the creation of all Panels
+         * it can take the following additional params
+         * Override action column
+         *
+         * actionColumn: {
+         xtype: 'widget.actioncolumn',
+         items: [
+         {
+         icon:'/www/js/ext-4.0.7/examples/shared/icons/fam/cog_edit.png', // Use a URL in the icon config
+         tooltip:'Edit',
+         handler:function (grid, rowIndex, colIndex) {
+         var rec = grid.getStore().getAt(rowIndex);
+         }
+         }
+         ]
+         */
 
+
+        Ext.define('M.view.DefaultPanel', {
+            extend:'Ext.grid.Panel',
+            alias: 'widget.banchapanel',
+            initComponent:function () {
+                var defaults = {
+                    scaffold:{
+                        storeDefaults:{
+                            autoLoad:true,
+                            storeId:this.scaffold.target
+                        },
+                        //here we collect the associated model and create stores. this is saved in this.assocs, which is
+                        //later read by afterBuild
+                        beforeBuild:function (model, config, addConfig) {
+                            //check assoc data from metadata, load if present
+                            this.assocs = [];
+                            //Parse associated models, push this info into this.assocs and create a corresponding store
+                            Ext.Object.each(Bancha.getRemoteApi().metadata[model.getName()].associations, function (id, el) {
+                                if (!Bancha.modelMetaDataIsLoaded(el.model)) {
+                                    Ext.Error.raise({
+                                        plugin:'Bancha',
+                                        model:el.model,
+                                        msg:'Bancha: Metadata for associated model not found. Probably it is not Bancha behaviored.'
+                                    });
+                                }
+                                Bancha.getModel(el.model);
+                                this.assocs.push({
+                                    model:el.model,
+                                    displayField:el.displayField,
+                                    foreignKey:el.foreignKey,
+                                    type: el.type
+                                });
+                                Ext.create('Ext.data.Store', {
+                                    model:el.model,
+                                    storeId:el.model
+                                });
+                            },this);
+                            return config;
+
+                        },
+                        afterBuild:function (config) {
+                            Ext.Object.each(config.assocs, function (id, el) {
+                                if (el.type == "belongsTo") { //find existing column and rewrite foreign id to displayField
+                                    var assocStore = Ext.StoreMgr.get(el.model).load();
+                                    //parse columns
+                                    for (i=0;i<config.columns.length;i++) {
+                                        if (config.columns[i].text == el.model) {
+                                            config.columns[i].xtype='gridcolumn';
+                                            config.columns[i].renderer = function(a,b,c) {
+                                                var entry = assocStore.getAt(assocStore.findExact('id', c.data[el.foreignKey]));
+                                                return entry.data[el.displayField];
+                                            }
+                                        }
+                                    }
+                                }
+                                //hasMany && habtm with ugly rewrites on the server
+                                if (el.type == "hasMany") {
+                                    var hasManyStore = Ext.StoreMgr.get(el.model).load();
+                                    //add column
+                                    var hasManyColumn = {
+                                         xtype: 'gridcolumn',
+                                         field: {
+                                             name: 'test',
+                                             xtype: 'textfield'
+                                         },
+                                         text: el.model,
+                                         width: 100,
+                                         renderer: function(a,b,c) {
+                                             hasManyStore.filter(el.foreignKey,c.data.id);
+                                             var output = "<ul>";
+                                             hasManyStore.each(function(el){
+                                                 output += '<li>' + el.data.name + '</li>';
+                                             }) ;
+                                             output += "</ul>";
+                                             hasManyStore.clearFilter();
+                                             return output;
+                                         }
+
+                                    };
+                                    //parse columns
+                                    for (i=0;i<config.columns.length;i++) {
+                                        if (config.columns[i].text == el.model) {
+                                            config.columns[i] = hasManyColumn;
+                                            hasManyColumn = "";
+                                        }
+                                    }
+                                }
+                            },this);
+                            // paging bar on the bottom
+                            config.bbar = Ext.create('Ext.PagingToolbar', {
+                                store:config.store,
+                                displayInfo:true,
+                                displayMsg:'Displaying entry {0} - {1} of {2}',
+                                emptyMsg:"No entires to display"
+                            });
+                            //Actioncolumn icon
+                            var actionColumn = this.columns.filter(function (el) {
+                                return el.xtype == 'actioncolumn'
+                            })[0];
+                            actionColumn.items[0].icon = "http://samples.banchaproject.org/img/icons/delete.png";
+                        },
+                        onCreate:function (button) {
+                            console.debug(button);
+                            var newTab = Ext.create('M.view.DefaultForm',{
+                                grid: {
+                                    store: button.ownerCt.ownerCt.store,
+                                    pos: -1
+                                }
+                            });
+                            var centerPanel = Ext.getCmp('mainTabPanel');
+                            var tab = centerPanel.items.findBy(function (i) {
+                                return i.title === newTab.title;
+                            }); // see if tab is open already
+                            if (!tab) {
+                                centerPanel.add(newTab);
+                                tab = newTab;
+                            }
+                            centerPanel.setActiveTab(tab);
+
+                        }
+                    }
+                }
+                Ext.apply(this, Ext.Object.merge({}, defaults, this.initialConfig));
+                // continue with standard behaviour
+                this.callParent();
+                //this.callOverridden();
+
+            }
+        });
+
+
+        Bancha.onModelReady(['Movie', 'Actor', 'Director'], function (userModel) {
             Ext.create('Ext.container.Viewport', {
-                layout: 'fit',
-                items: [{
-                    xtype: 'tabpanel', // TabPanel itself has no title
-                    activeTab: 0,      // First tab active by default
-                    items: [
-                        Ext.create('Ext.grid.Panel', {
-                                scaffold:'Movie', // model name
-                                frame:true,
-                                title:'Movie Panel'
-                            }),
-                        Ext.create('Ext.grid.Panel', {
-                            scaffold:'Actor', // model name
-                            frame:true,
-                            title:'Actor Panel'
-                        }),
-                        Ext.create('Ext.grid.Panel', {
-                            scaffold:'Director', // model name
-                            frame:true,
-                            title:'Director Panel'
-                        })
-
-                    ]
-                }]
+                layout:'fit',
+                items:[
+                    {
+                        xtype:'tabpanel', // TabPanel itself has no title
+                        activeTab:0, // First tab active by default
+                        items:[
+                            {
+                                xtype:'banchapanel',
+                                scaffold:{
+                                    target:'Movie',
+                                    title:'Movie Panel'
+                                }
+                            },
+                            {
+                                xtype:'banchapanel',
+                                scaffold:{
+                                    target:'Actor',
+                                    title:'Actor Panel'
+                                }
+                            },
+                            {
+                                xtype:'banchapanel',
+                                scaffold:{
+                                    target:'Director',
+                                    title:'Director Panel'
+                                }
+                            }
+                        ]
+                    }
+                ]
             });
 
 

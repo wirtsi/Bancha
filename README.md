@@ -2,6 +2,17 @@ Bancha - Combining ExtJS and CakePHP
 ====================================
 Currently in Beta release.
 
+This is a fork of Bancha (https://github.com/Bancha/Bancha.git). I need to implement display and editing of associated
+model data, something Bancha doesn't yet support out of the box
+
+The used sample data can be found in database.sql
+
+The directories _Model and _Controller should be linked to app/Model and app/Controller. Under Windows 7 this can be done
+with mklink /D "_Controller" "..\..\Controller"
+
+
+
+
 What is Bancha?
 ---------------
 

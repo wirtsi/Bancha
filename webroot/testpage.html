@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>
+        Bancha Association Test Page
+    </title>
+    <link rel="stylesheet" type="text/css" href="../css/resources/css/ext-all.css"/>
+    <script type='text/javascript' src='../js/ext-all-dev.js'></script>
+    <script type="text/javascript" src="js/Bancha.js"></script>
+    <script type="text/javascript" src="../bancha-api/models/all.js"></script>
+</head>
+<body>
+<div id='gridpanel' style='width: 500px;height: 500px;'></div>
+<script type='text/javascript'>
+    /*!
+     *
+     * Bancha Project : Combining Ext JS and CakePHP (http://banchaproject.org)
+     * Copyright 2011-2012 Roland Schuetz, Kung Wong, Andreas Kern, Florian Eckerstorfer
+     *
+     * Licensed under The MIT License
+     * Redistributions of files must retain the above copyright notice.
+     *
+     * @package       Bancha
+     * @copyright     Copyright 2011-2012 Roland Schuetz, Kung Wong, Andreas Kern, Florian Eckerstorfer
+     * @link          http://banchaproject.org Bancha Project
+     * @since         Bancha v 0.2.0
+     * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
+     * @author        Roland Schuetz <mail@rolandschuetz.at>
+     * @version       Bancha v 0.9.3
+     *
+     * For more information go to http://banchaproject.org
+     */
+    /*jslint browser: true, vars: false, plusplus: true, white: true, sloppy: true */
+    /*global Ext, Bancha */
+
+    // API and Bancha is already included,
+    // now load sample dependencies
+    Ext.require([
+        'Ext.form.*',
+        'Ext.grid.*'
+    ]);
+
+    Ext.onReady(function () {
+        // when Bancha is ready, the model meta data is loaded
+        // from the server and the model is created....
+        Bancha.onModelReady(['Movie','Actor','Director'], function (userModel) {
+
+            Ext.create('Ext.container.Viewport', {
+                layout: 'fit',
+                items: [{
+                    xtype: 'tabpanel', // TabPanel itself has no title
+                    activeTab: 0,      // First tab active by default
+                    items: [
+                        Ext.create('Ext.grid.Panel', {
+                                scaffold:'Movie', // model name
+                                frame:true,
+                                title:'Movie Panel'
+                            }),
+                        Ext.create('Ext.grid.Panel', {
+                            scaffold:'Actor', // model name
+                            frame:true,
+                            title:'Actor Panel'
+                        }),
+                        Ext.create('Ext.grid.Panel', {
+                            scaffold:'Director', // model name
+                            frame:true,
+                            title:'Director Panel'
+                        })
+
+                    ]
+                }]
+            });
+
+
+        });
+        // eof
+    });
+</script>
+
+</body>
+</html>

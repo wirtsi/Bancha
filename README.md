@@ -8,9 +8,9 @@ model data, something Bancha doesn't yet support out of the box
 The used sample data can be found in database.sql
 
 The directories _Model and _Controller should be linked to app/Model and app/Controller. Under Windows 7 this can be done
-with mklink /D "_Controller" "..\..\Controller"
+with mklink /J "_Controller" "..\..\Controller"
 
-
+The test page can be viewed at <your server & path>/bancha/testpage.html
 
 
 What is Bancha?

@@ -5,8 +5,32 @@
 
         public function index() {
             $this->Movie->recursive = 0;
-            $movies = $this->paginate();
-            return array_merge($this->request['paging']['Movie'], array('records' => $movies));
+            $results = $this->paginate();
+
+            $options['joins'] = array(
+                array('table' => 'movies_actors',
+                    'alias' => 'JoinTable',
+                    'type' => 'INNER',
+                    'conditions' => array(
+                        'Movie.id = JoinTable.movie_id',
+                    )
+                ),
+                    array('table' => 'actors',
+                        'alias' => 'Actor',
+                        'type' => 'inner',
+                        'conditions' => array(
+                            'JoinTable.actor_id = Actor.id'
+                        )
+
+                    )
+            );
+            $options['fields'] = array('Movie.*','Actor.id');
+            $results = $this->Movie->find("all",$options);
+            foreach ($results as $key => $value) {
+                $results[$key]['Movie']['actor_id'] = $results[$key]['Actor']['id'];
+                unset($results[$key]['Actor']);
+            }
+            return array_merge($this->request['paging']['Movie'], array('records' => $results));
         }
 
         public function view($id = null) {

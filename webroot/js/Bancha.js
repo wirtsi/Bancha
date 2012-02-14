@@ -832,7 +832,7 @@ Ext.define('Bancha', {
             } else {
                 modelsToLoad.push(modelName);
             }
-        });
+        },this);
         
         // iterate trought the loading models
         Ext.each(loadingModels, function(modelName) {
@@ -841,7 +841,7 @@ Ext.define('Bancha', {
                 loadedModels[modelName] = this.getModel(modelName);
                 return false; // stop
             }
-        });
+        },this);
         
         if(modelsToLoad.length===0) {
             // all metadata already present, call callback

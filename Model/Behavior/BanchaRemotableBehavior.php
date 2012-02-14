@@ -62,12 +62,12 @@ class BanchaRemotableBehavior extends ModelBehavior {
 	);
 
 	/**
-	 * since cakephp deletes $model->data after a save action 
+	 * since cakephp deletes $model->data after a save action
 	 * we keep the necessary return values here, access through
 	 * $model->getLastSaveResult();
 	 */
 	private $result = null;
-	
+
 	/**
 	 * the default behavor configuration
 	 */
@@ -81,7 +81,7 @@ class BanchaRemotableBehavior extends ModelBehavior {
 		'useOnlyDefinedFields' => true,
 	);
 /**
- * Sets up the BanchaRemotable behavior. For config options see 
+ * Sets up the BanchaRemotable behavior. For config options see
  * https://github.com/Bancha/Bancha/wiki/BanchaRemotableBehavior-Configurations
  *
  * @param object $Model instance of model
@@ -91,7 +91,7 @@ class BanchaRemotableBehavior extends ModelBehavior {
 	public function setup(&$Model, $config = array()) {
 		$this->model = $Model;
 		$this->schema = $Model->schema();
-		
+
 		// apply configs
 		if(!is_array($config)) {
 			throw new CakeException("Bancha: The BanchaRemotableBehavior currently only supports an array of options as configuration");
@@ -168,51 +168,60 @@ class BanchaRemotableBehavior extends ModelBehavior {
 		$upload_info = array_shift($data);
 
 		// No file uploaded.
-		if ($required && $upload_info[’size’] == 0) {
+		if ($required && $upload_info['size'] == 0) {
 				return false;
 		}
 
 		// Check for Basic PHP file errors.
-		if ($upload_info[‘error’] !== 0) {
+		if ($upload_info['error'] !== 0) {
 			return false;
 		}
 
 		// Finally, use PHP’s own file validation method.
-		return is_uploaded_file($upload_info[‘tmp_name’]);
+		return is_uploaded_file($upload_info['tmp_name']);
 	}
-		
+
 	// TODO remove workarround for 'file' validation
 	public function file($check) {
 		return true;
 	}
 
-/**
- * Return the Associations as ExtJS-Assoc Model
- * should look like this:
- * <code>
- * associations: [
- *	    {type: 'hasMany', model: 'Post',	name: 'posts'},
- *	    {type: 'hasMany', model: 'Comment', name: 'comments'}
- *   ]
- * </code>
- *   
- *   (source http://docs.sencha.com/ext-js/4-0/#/api/Ext.data.Model)
- *   
- *   in cakephp it is stored as this <code>Array ( [Article] => hasMany )</code>
- */
-	private function getAssociated() {
-		$assocs = $this->model->getAssociated();
-		$return = array();
-		foreach ($assocs as $field => $value) {
-			if($value != 'hasAndBelongsToMany') { // extjs doesn't support hasAndBelongsToMany
-				$name = lcfirst(Inflector::pluralize($field)); //generate a handy name
-				$return[] = array ('type' => $value, 'model' => $field, 'name' => $name);
-			}
-		}
-		return $return;
-	}
+    /**
+     * Return the Associations as ExtJS-Assoc Model
+     * should look like this:
+     * <code>
+     * associations: [
+     *        {type: 'hasMany', model: 'Post',    name: 'posts'},
+     *        {type: 'hasMany', model: 'Comment', name: 'comments'}
+     *   ]
+     * </code>
+     *
+     *   (source http://docs.sencha.com/ext-js/4-0/#/api/Ext.data.Model)
+     *
+     *   in cakephp it is stored as this <code>Array ( [Article] => hasMany )</code>
+     */
+    //adds associated model information to meta description
+    //since Ext doesn't know about habtm we fake hasMany here
+    private function getAssociated() {
+        $assocs = $this->model->getAssociated();
+        $return = array();
+        foreach ($assocs as $field => $value) {
+            //if($value != 'hasAndBelongsToMany') { // extjs doesn't support hasAndBelongsToMany
+            $name = lcfirst(Inflector::pluralize($field)); //generate a handy name
+            $foreignKey = $this->model->{$value}[$field]['foreignKey']; //get foreign key
+            $return[] = array(
+                'type' => ($value == "hasAndBelongsToMany" ? 'hasMany' : $value),
+                'model' => $field,
+                'name' => $name,
+                'foreignKey' => $foreignKey,
+                'displayField' => 'name' //TODO: get displayField from associated model, add override an actAs
+            );
+            //}
+        }
+        return $return;
+    }
 
-/**
+    /**
  * return the model columns as ExtJS Fields
  *
  * should look like
@@ -230,6 +239,15 @@ class BanchaRemotableBehavior extends ModelBehavior {
 		foreach ($columns as $field => $values) {
 				array_push($cols, array( 'name' => $field, 'type' => $this->types[$values]));
 		}
+        //fix for habtm and hasmany ... ugly
+        $assocs = $this->model->getAssociated();
+        foreach ($assocs as $field => $value) {
+            if($value == 'hasAndBelongsToMany' || $value == 'hasMany') { // extjs doesn't support hasAndBelongsToMany
+                $name = lcfirst($field); //generate a handy name
+                array_push($cols,array('name'=>$name.'_id','type'=>'string'));
+            }
+
+        }
 		return $cols;
 	}
 
@@ -247,7 +265,7 @@ class BanchaRemotableBehavior extends ModelBehavior {
 		}
 		$cols = array();
 		foreach ($columns as $field => $values) {
-			
+
 			// check is the input is required
 			$presence = false;
 			foreach($values as $rule) {
@@ -345,23 +363,23 @@ class BanchaRemotableBehavior extends ModelBehavior {
 					);
 				}
 			}
-			
+
 			if(isset($values['range'])) {
-				// this rule is a bit ambiguous in cake, it tests like this: 
+				// this rule is a bit ambiguous in cake, it tests like this:
 				// return ($check > $lower && $check < $upper);
 				// since ext understands it like this:
 				// return ($check >= $lower && $check <= $upper);
 				// we have to change the value
 				$min = $values['range']['rule'][1];
 				$max = $values['range']['rule'][2];
-				
+
 				if(isset($values['numeric']['precision'])) {
 					// increment/decrease by the smallest possible value
 					$amount = 1*pow(10,-$values['numeric']['precision']);
 					$min += $amount;
 					$max -= $amount;
 				} else {
-					
+
 					// if debug tell dev about problem
 					if(Configure::read('debug')>0) {
 						throw new CakeException(
@@ -371,7 +389,7 @@ class BanchaRemotableBehavior extends ModelBehavior {
 							"This error is only displayed in debug mode."
 						);
 					}
-					
+
 					// best guess
 					$min += 1;
 					$max += 1;
@@ -397,7 +415,7 @@ class BanchaRemotableBehavior extends ModelBehavior {
 	}
 
 	/**
-	 * After saving load the full record from the database to 
+	 * After saving load the full record from the database to
 	 * return to the frontend
 	 *
 	 * @param object $model Model using this behavior
@@ -417,7 +435,7 @@ class BanchaRemotableBehavior extends ModelBehavior {
 			$this->result = $model->read();
 			$model->recursive = $currentRecursive;
 		}
-		
+
 		return true;
 	}
 
@@ -428,7 +446,7 @@ class BanchaRemotableBehavior extends ModelBehavior {
 	public function getLastSaveResult() {
 		return $this->result;
 	}
-	
+
 	/**
 	 * Builds a field list with all defined fields
 	 */
@@ -437,7 +455,7 @@ class BanchaRemotableBehavior extends ModelBehavior {
 	}
 	/**
 	 * See $this->_defaults['useOnlyDefinedFields'] for an explanation
-	 * 
+	 *
 	 * @param $model the model
 	 * @param $options the validation options
 	 */
@@ -446,13 +464,13 @@ class BanchaRemotableBehavior extends ModelBehavior {
 			// if not yet defined, create a field list to validate only the changes (empty records will still invalidate)
 			$model->whitelist = empty($options['fieldList']) ? $this->buildFieldList($model->data) : $options['fieldList']; // TODO how to not overwrite the whitelist?
 		}
-		
+
 		// start validating data
 		return true;
 	}
 	/**
 	 * See $this->_defaults['useOnlyDefinedFields'] for an explanation
-	 * 
+	 *
 	 * @param $model the model
 	 * @param $options the save options
 	 */
@@ -461,14 +479,14 @@ class BanchaRemotableBehavior extends ModelBehavior {
 			// if not yet defined, create a field list to save only the changes
 			$options['fieldList'] = empty($options['fieldList']) ? $this->buildFieldList($model->data) : $options['fieldList'];
 		}
-		
+
 		// start saving data
 		return true;
 	}
 	/**
-	 * Saves a records, either add or edit. 
+	 * Saves a records, either add or edit.
 	 * See $this->_defaults['useOnlyDefinedFields'] for an explanation
-	 * 
+	 *
 	 * @param $model the model (set by cake)
 	 * @param $data the data to save (first user argument)
 	 * @param $options the save options
@@ -478,7 +496,7 @@ class BanchaRemotableBehavior extends ModelBehavior {
 		// overwrite config for this commit
 		$config = $this->settings[$this->model->alias]['useOnlyDefinedFields'];
 		$this->settings[$this->model->alias]['useOnlyDefinedFields'] = true;
-		
+
 		// this should never be the case, cause Bancha cannot handle validation errors currently
 		// We expect to automatically send validation errors to the client in the right format in version 1.1
 		if($data) {
@@ -492,9 +510,9 @@ class BanchaRemotableBehavior extends ModelBehavior {
 			}
 			throw new BadRequestException($msg);
 		}
-		
+
 		$result = $model->save($model->data,$options);
-		
+
 		// set back
 		$this->settings[$this->model->alias]['useOnlyDefinedFields'] = $config;
 		return $result;

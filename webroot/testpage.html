@@ -11,7 +11,6 @@
     <script type="text/javascript" src="../bancha-api/models/all.js"></script>
 </head>
 <body>
-<div id='gridpanel' style='width: 500px;height: 500px;'></div>
 <script type='text/javascript'>
     /*!
      *
@@ -42,27 +41,8 @@
     ]);
 
     Ext.onReady(function () {
-        // when Bancha is ready, the model meta data is loaded
-        // from the server and the model is created....
-        /**
-         * FactoryPanel is the Factory for the creation of all Panels
-         * it can take the following additional params
-         * Override action column
-         *
-         * actionColumn: {
-         xtype: 'widget.actioncolumn',
-         items: [
-         {
-         icon:'/www/js/ext-4.0.7/examples/shared/icons/fam/cog_edit.png', // Use a URL in the icon config
-         tooltip:'Edit',
-         handler:function (grid, rowIndex, colIndex) {
-         var rec = grid.getStore().getAt(rowIndex);
-         }
-         }
-         ]
-         */
 
-
+        //Define default panel
         Ext.define('M.view.DefaultPanel', {
             extend:'Ext.grid.Panel',
             alias: 'widget.banchapanel',
@@ -105,21 +85,26 @@
                         afterBuild:function (config) {
                             Ext.Object.each(config.assocs, function (id, el) {
                                 if (el.type == "belongsTo") { //find existing column and rewrite foreign id to displayField
-                                    var assocStore = Ext.StoreMgr.get(el.model).load();
+                                    var assocStore = Ext.StoreMgr.get(el.model).load({params:{start: 0, limit: 500}});
                                     //parse columns
                                     for (i=0;i<config.columns.length;i++) {
-                                        if (config.columns[i].text == el.model) {
+                                        if (config.columns[i].text == el.model) { //change belongsTo column
                                             config.columns[i].xtype='gridcolumn';
+                                            config.columns[i].editor = {
+                                              xtype: 'combobox',
+                                              displayField: 'name',
+                                              valueField: 'id'
+                                            },
                                             config.columns[i].renderer = function(a,b,c) {
-                                                var entry = assocStore.getAt(assocStore.findExact('id', c.data[el.foreignKey]));
-                                                return entry.data[el.displayField];
+                                                var entry = assocStore.getAt(assocStore.findExact('id', c.get(el.foreignKey)));
+                                                return entry.get(el.displayField);
                                             }
                                         }
                                     }
                                 }
                                 //hasMany && habtm with ugly rewrites on the server
                                 if (el.type == "hasMany") {
-                                    var hasManyStore = Ext.StoreMgr.get(el.model).load();
+                                    var hasManyStore = Ext.StoreMgr.get(el.model).load({params:{start: 0, limit: 500}});
                                     //add column
                                     var hasManyColumn = {
                                          xtype: 'gridcolumn',
@@ -128,12 +113,16 @@
                                              xtype: 'textfield'
                                          },
                                          text: el.model,
-                                         width: 100,
-                                         renderer: function(a,b,c) {
-                                             hasManyStore.filter(el.foreignKey,c.data.id);
+                                         width: 300,
+                                         renderer: function(value,metaData,record) {
+                                             hasManyStore.filter({
+                                                 filterFn: function(item) {
+                                                     return item.get(el.foreignKey) == record.get('id');
+                                                 }
+                                             });
                                              var output = "<ul>";
                                              hasManyStore.each(function(el){
-                                                 output += '<li>' + el.data.name + '</li>';
+                                                 output += '<li>' + el.get('name') + '</li>';
                                              }) ;
                                              output += "</ul>";
                                              hasManyStore.clearFilter();
@@ -162,33 +151,12 @@
                                 return el.xtype == 'actioncolumn'
                             })[0];
                             actionColumn.items[0].icon = "http://samples.banchaproject.org/img/icons/delete.png";
-                        },
-                        onCreate:function (button) {
-                            console.debug(button);
-                            var newTab = Ext.create('M.view.DefaultForm',{
-                                grid: {
-                                    store: button.ownerCt.ownerCt.store,
-                                    pos: -1
-                                }
-                            });
-                            var centerPanel = Ext.getCmp('mainTabPanel');
-                            var tab = centerPanel.items.findBy(function (i) {
-                                return i.title === newTab.title;
-                            }); // see if tab is open already
-                            if (!tab) {
-                                centerPanel.add(newTab);
-                                tab = newTab;
-                            }
-                            centerPanel.setActiveTab(tab);
-
                         }
                     }
                 }
                 Ext.apply(this, Ext.Object.merge({}, defaults, this.initialConfig));
                 // continue with standard behaviour
                 this.callParent();
-                //this.callOverridden();
-
             }
         });
 
@@ -232,6 +200,5 @@
         // eof
     });
 </script>
-
 </body>
 </html>

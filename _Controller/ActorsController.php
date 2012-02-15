@@ -2,12 +2,12 @@
     class ActorsController extends AppController {
 
         var $name = 'Actors';
+        public $paginate = array(); //don't forget to set this
 
         public function index() {
             $this->Actor->recursive = 0;
-            $results = $this->paginate();
 
-            $options['joins'] = array(
+            $this->paginate['joins'] = array(
                 array('table' => 'movies_actors',
                     'alias' => 'JoinTable',
                     'type' => 'INNER',
@@ -15,22 +15,23 @@
                         'Actor.id = JoinTable.actor_id',
                     )
                 ),
-                    array('table' => 'movies',
-                        'alias' => 'Movie',
-                        'type' => 'inner',
-                        'conditions' => array(
-                            'JoinTable.movie_id = Movie.id'
-                        )
-
+                array('table' => 'movies',
+                    'alias' => 'Movie',
+                    'type' => 'inner',
+                    'conditions' => array(
+                        'JoinTable.movie_id = Movie.id'
                     )
+
+                )
             );
-            $options['fields'] = array('Actor.*','Movie.id');
-            $results = $this->Actor->find("all",$options);
+            $this->paginate['fields'] = array('Actor.*','Movie.id');
+            $this->paginate['maxLimit'] = 1000;
+            $results = $this->paginate();
+
             foreach ($results as $key => $value) {
                 $results[$key]['Actor']['movie_id'] = $results[$key]['Movie']['id'];
                 unset($results[$key]['Movie']);
             }
-            
             return array_merge($this->request['paging']['Actor'], array('records' => $results));
         }
 

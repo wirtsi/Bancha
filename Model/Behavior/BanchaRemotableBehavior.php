@@ -244,7 +244,7 @@ class BanchaRemotableBehavior extends ModelBehavior {
         foreach ($assocs as $field => $value) {
             if($value == 'hasAndBelongsToMany' || $value == 'hasMany') { // extjs doesn't support hasAndBelongsToMany
                 $name = lcfirst($field); //generate a handy name
-                array_push($cols,array('name'=>$name.'_id','type'=>'string'));
+                array_push($cols,array('name'=>$name.'_id','type'=>'int'));
             }
 
         }

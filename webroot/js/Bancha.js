@@ -792,7 +792,8 @@ Ext.define('Bancha', {
 
 		// defaults
         var modelsToLoad  = [],
-            modelName;
+            modelName,
+            me = this;
         callback = callback || Ext.emptyFn;	
         scope = scope || {}; // sandbox is no scope is set, way easier to debug then window	
         loadingModels = loadingModels || {};
@@ -827,8 +828,8 @@ Ext.define('Bancha', {
         
         // iterate trought the models to load
         Ext.Array.forEach(modelNamesToLoad, function(modelName) {
-            if(this.modelMetaDataIsLoaded(modelName)) {
-                loadedModels[modelName] = this.getModel(modelName);
+            if(me.modelMetaDataIsLoaded(modelName)) {
+                loadedModels[modelName] = me.getModel(modelName);
             } else {
                 modelsToLoad.push(modelName);
             }
@@ -836,9 +837,9 @@ Ext.define('Bancha', {
         
         // iterate trought the loading models
         Ext.each(loadingModels, function(modelName) {
-            if(this.modelMetaDataIsLoaded(modelName)) {
+            if(me.modelMetaDataIsLoaded(modelName)) {
                 // that was the model which triggered the function, so we are finished here
-                loadedModels[modelName] = this.getModel(modelName);
+                loadedModels[modelName] = me.getModel(modelName);
                 return false; // stop
             }
         },this);
@@ -848,12 +849,10 @@ Ext.define('Bancha', {
             callback.call(scope,loadedModels);
         } else {
             // add all elements to the queue
-            Ext.Array.forEach(modelsToLoad, function(modelName) {
-                this.preloadModelMetaData(modelName, function() {
-                    // when model is loaded try again
-                    this.onInitializedOnModelReady([], loadingModels, loadedModels, callback, scope);
-                },this);
-            }, this);
+            me.preloadModelMetaData(modelsToLoad, function() {
+                // when model is loaded try again
+                me.onInitializedOnModelReady([], loadingModels, loadedModels, callback, scope);
+            },me);
         }
     },
     /**
@@ -1546,48 +1545,35 @@ Ext.define('Bancha', {
                 // instantly remove vom ui
                 store.remove(rec);
                 
-                // delete on server
-                if (!rec.phantom) {
-                    rec.destroy({
-                        success: function(record,operation) {
-    
-                            Ext.MessageBox.show({
-                                title: name + ' record deleted',
-                                msg: name + ' record was successfully deleted.',
-                                icon: Ext.MessageBox.INFO,
-                                buttons: Ext.Msg.OK
-                            });
-                        },
-                        failure: function(record,operation) {
-                            
-                            // since it couldn't be deleted, add again
-                            store.add(rec);
-                            
-                            // inform user
-                            Ext.MessageBox.show({
-                                title: name + ' record could not be deleted',
-                                msg: operation.getError() || (name + ' record could not be deleted.'),
-                                icon: Ext.MessageBox.ERROR,
-                                buttons: Ext.Msg.OK
-                            });
-                        },
-                        callback: function(record,operation) {
-                            
-                            // TODO how to solve this?
-                            // http://www.sencha.com/forum/showthread.php?157580-Don-t-resend-fails-rec.destroy()-with-Ext.Direct&p=680442#post680442
-                            grid.setLoading(false); // destroy old mask
-                            grid.setLoading("Currently we can not handle any respones after delete, so after this action <br />the grid is not usable anymore. Sry.");
-                            
-                        }
-                    });
-                } else {
-                    Ext.MessageBox.show({
-                        title: name + ' record deleted',
-                        msg: name + ' record was successfully deleted.',
-                        icon: Ext.MessageBox.INFO,
-                        buttons: Ext.Msg.OK
-                    });
-                }
+                // sync to server
+                store.sync();
+                
+                /* store.sync callbacks are only supported in ExtJS 4.1
+                store.sync({
+                    success: function(record,operation) {
+
+                        Ext.MessageBox.show({
+                            title: name + ' record deleted',
+                            msg: name + ' record was successfully deleted.',
+                            icon: Ext.MessageBox.INFO,
+                            buttons: Ext.Msg.OK
+                        });
+                    },
+                    failure: function(record,operation) {
+                        
+                        // since it couldn't be deleted, add again
+                        store.add(rec);
+                        
+                        // inform user
+                        Ext.MessageBox.show({
+                            title: name + ' record could not be deleted',
+                            msg: operation.getError() || (name + ' record could not be deleted.'),
+                            icon: Ext.MessageBox.ERROR,
+                            buttons: Ext.Msg.OK
+                        });
+                    }
+                }); */
+                
             },
             /**
              * @property

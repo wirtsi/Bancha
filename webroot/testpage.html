@@ -12,193 +12,238 @@
 </head>
 <body>
 <script type='text/javascript'>
-    /*!
-     *
-     * Bancha Project : Combining Ext JS and CakePHP (http://banchaproject.org)
-     * Copyright 2011-2012 Roland Schuetz, Kung Wong, Andreas Kern, Florian Eckerstorfer
-     *
-     * Licensed under The MIT License
-     * Redistributions of files must retain the above copyright notice.
-     *
-     * @package       Bancha
-     * @copyright     Copyright 2011-2012 Roland Schuetz, Kung Wong, Andreas Kern, Florian Eckerstorfer
-     * @link          http://banchaproject.org Bancha Project
-     * @since         Bancha v 0.2.0
-     * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
-     * @author        Roland Schuetz <mail@rolandschuetz.at>
-     * @version       Bancha v 0.9.3
-     *
-     * For more information go to http://banchaproject.org
-     */
-    /*jslint browser: true, vars: false, plusplus: true, white: true, sloppy: true */
-    /*global Ext, Bancha */
+/*!
+ *
+ * Bancha Project : Combining Ext JS and CakePHP (http://banchaproject.org)
+ * Copyright 2011-2012 Roland Schuetz, Kung Wong, Andreas Kern, Florian Eckerstorfer
+ *
+ * Licensed under The MIT License
+ * Redistributions of files must retain the above copyright notice.
+ *
+ * @package       Bancha
+ * @copyright     Copyright 2011-2012 Roland Schuetz, Kung Wong, Andreas Kern, Florian Eckerstorfer
+ * @link          http://banchaproject.org Bancha Project
+ * @since         Bancha v 0.2.0
+ * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
+ * @author        Roland Schuetz <mail@rolandschuetz.at>
+ * @version       Bancha v 0.9.3
+ *
+ * For more information go to http://banchaproject.org
+ */
+/*jslint browser: true, vars: false, plusplus: true, white: true, sloppy: true */
+/*global Ext, Bancha */
 
-    // API and Bancha is already included,
-    // now load sample dependencies
-    Ext.require([
-        'Ext.form.*',
-        'Ext.grid.*'
-    ]);
+// API and Bancha is already included,
+// now load sample dependencies
+Ext.require([
+    'Ext.form.*',
+    'Ext.grid.*'
+]);
 
-    Ext.onReady(function () {
 
-        //Define default panel
-        Ext.define('M.view.DefaultPanel', {
-            extend:'Ext.grid.Panel',
-            alias: 'widget.banchapanel',
-            initComponent:function () {
-                var defaults = {
-                    scaffold:{
-                        storeDefaults:{
-                            autoLoad:true,
-                            storeId:this.scaffold.target
-                        },
-                        //here we collect the associated model and create stores. this is saved in this.assocs, which is
-                        //later read by afterBuild
-                        beforeBuild:function (model, config, addConfig) {
-                            //check assoc data from metadata, load if present
-                            this.assocs = [];
-                            //Parse associated models, push this info into this.assocs and create a corresponding store
-                            Ext.Object.each(Bancha.getRemoteApi().metadata[model.getName()].associations, function (id, el) {
-                                if (!Bancha.modelMetaDataIsLoaded(el.model)) {
-                                    Ext.Error.raise({
-                                        plugin:'Bancha',
-                                        model:el.model,
-                                        msg:'Bancha: Metadata for associated model not found. Probably it is not Bancha behaviored.'
-                                    });
+Ext.onReady(function () {
+    Bancha.scaffold.Grid.destroyButtonConfig.items[0].icon = "http://samples.banchaproject.org/img/icons/delete.png";
+    //Define default panel
+    Ext.define('M.view.DefaultPanel', {
+        extend:'Ext.grid.Panel',
+        alias:'widget.banchapanel',
+        initComponent:function () {
+
+            var defaults = {
+                scaffold:{
+                    storeDefaults:{
+                        autoLoad:true,
+                        storeId:this.scaffold.target
+                    },
+                    //here we collect the associated model and create stores. this is saved in this.assocs, which is
+                    //later read by afterBuild
+                    beforeBuild:function (model, config, addConfig) {
+                        //check assoc data from metadata, load if present
+                        this.assocs = [];
+                        //Parse associated models, push this info into this.assocs and create a corresponding store
+                        Ext.Object.each(Bancha.getModelMetaData(model.getName()).associations, function (id, el) {
+                            if (!Bancha.modelMetaDataIsLoaded(el.model)) {
+                                Ext.Error.raise({
+                                    plugin:'Bancha',
+                                    model:el.model,
+                                    msg:'Bancha: Metadata for associated model not found. Probably it is not Bancha behaviored.'
+                                });
+                            }
+                            Bancha.getModel(el.model);
+                            this.assocs.push({
+                                model:el.model,
+                                displayField:el.displayField,
+                                foreignKey:el.foreignKey,
+                                type:el.type
+                            });
+                            Ext.create('Ext.data.Store', {
+                                model:el.model,
+                                storeId:el.model
+                            });
+                        }, this);
+                        console.debug(config);
+                        return config;
+
+                    },
+                    afterBuild:function (config) {
+                        Ext.Object.each(config.assocs, function (id, el) {
+                            if (el.type == "belongsTo") { //find existing column and rewrite foreign id to displayField
+                                var assocStore = Ext.StoreMgr.get(el.model).load({params:{start:0, limit:500}});
+                                console.debug(assocStore);
+                                //parse columns
+                                for (i = 0; i < config.columns.length; i++) {
+                                    if (config.columns[i].text == el.model) { //change belongsTo column
+                                        config.columns[i].xtype = 'gridcolumn';
+                                        delete config.columns[i].field; //field is deprecated, use editor instead
+
+                                        config.columns[i].renderer = function (a, b, c) {
+                                            var entry = assocStore.getAt(assocStore.findExact('id', c.get(el.foreignKey)));
+                                            return entry ? entry.get(el.displayField) : 'empty';
+                                        }
+
+                                        config.columns[i].editor = {
+                                            xtype:'combobox',
+                                            store:assocStore,
+                                            lazyRender:true,
+                                            displayField:'name',
+                                            valueField:'id',
+                                            emptyText:"Please select one",
+                                            allowBlank:false,
+                                            queryMode:'local'
+                                        }
+                                    }
                                 }
-                                Bancha.getModel(el.model);
-                                this.assocs.push({
-                                    model:el.model,
-                                    displayField:el.displayField,
-                                    foreignKey:el.foreignKey,
-                                    type: el.type
-                                });
-                                Ext.create('Ext.data.Store', {
-                                    model:el.model,
-                                    storeId:el.model
-                                });
-                            },this);
-                            return config;
+                            }
+                            //hasMany && habtm with ugly rewrites on the server
+                            if (el.type == "hasMany") {
+                                var hasManyStore = Ext.StoreMgr.get(el.model).load({params:{start:0, limit:500}});
+                                for (var i = 0; i < config.columns.length; i++) {
 
-                        },
-                        afterBuild:function (config) {
-                            Ext.Object.each(config.assocs, function (id, el) {
-                                if (el.type == "belongsTo") { //find existing column and rewrite foreign id to displayField
-                                    var assocStore = Ext.StoreMgr.get(el.model).load({params:{start: 0, limit: 500}});
-                                    //parse columns
-                                    for (i=0;i<config.columns.length;i++) {
-                                        if (config.columns[i].text == el.model) { //change belongsTo column
-                                            config.columns[i].xtype='gridcolumn';
-                                            config.columns[i].editor = {
-                                              xtype: 'combobox',
-                                              displayField: 'name',
-                                              valueField: 'id'
-                                            },
-                                            config.columns[i].renderer = function(a,b,c) {
-                                                var entry = assocStore.getAt(assocStore.findExact('id', c.get(el.foreignKey)));
-                                                return entry.get(el.displayField);
+                                    if (config.columns[i].text == el.model) { //change hasMany column
+                                        config.columns[i].xtype = 'gridcolumn';
+                                        delete config.columns[i].field; //this is required for combobox to work
+
+
+                                        //if field was changed use value otherwise parse record id
+                                        config.columns[i].renderer = function (value, metaData, record) {
+
+                                            if (value && record.dirty) {
+                                                if (typeof(value) == "string") value = value.split(',');
+
+                                                for (var j=0;j<value.length;j++) {
+                                                    value[j] = parseInt(value[j]);
+                                                }
+                                                hasManyStore.filter({
+                                                    filterFn: function (item) {
+                                                        return Ext.Array.contains(value,item.get('id'))
+                                                    }
+                                                });
+                                            } else {
+                                                hasManyStore.filter({
+                                                    filterFn:function (item) {
+                                                        return item.get(el.foreignKey) == record.get('id');
+                                                    }
+                                                });
+                                            }
+                                            var output = "";
+                                            hasManyStore.each(function (el) {
+                                                output += el.get('name') + ', ';
+
+                                            });
+                                            //record.set(el.foreignKey+'_temp',values);
+                                            output = output.substr(0, output.length - 2);
+                                            hasManyStore.clearFilter();
+                                            return output;
+                                        };
+                                        console.debug(hasManyStore);
+
+                                        config.columns[i].editor = {
+                                            xtype:'combobox',
+                                            store:hasManyStore,
+                                            lazyRender:true,
+                                            displayField:'name',
+                                            id: 'frimp',
+                                            valueField: 'id',
+                                            multiSelect:true,
+                                            allowBlank:false,
+                                            queryMode:'local',
+                                            listeners:{
+                                                scope: this,
+                                                focus:function (combo) {
+                                                    console.debug(combo);
+                                                    console.debug(this);
+
+                                                    setTimeout(function () {
+                                                        combo.setValue(combo.value)
+                                                    }, 300);
+                                                }
                                             }
                                         }
                                     }
                                 }
-                                //hasMany && habtm with ugly rewrites on the server
-                                if (el.type == "hasMany") {
-                                    var hasManyStore = Ext.StoreMgr.get(el.model).load({params:{start: 0, limit: 500}});
-                                    //add column
-                                    var hasManyColumn = {
-                                         xtype: 'gridcolumn',
-                                         field: {
-                                             name: 'test',
-                                             xtype: 'textfield'
-                                         },
-                                         text: el.model,
-                                         width: 300,
-                                         renderer: function(value,metaData,record) {
-                                             hasManyStore.filter({
-                                                 filterFn: function(item) {
-                                                     return item.get(el.foreignKey) == record.get('id');
-                                                 }
-                                             });
-                                             var output = "<ul>";
-                                             hasManyStore.each(function(el){
-                                                 output += '<li>' + el.get('name') + '</li>';
-                                             }) ;
-                                             output += "</ul>";
-                                             hasManyStore.clearFilter();
-                                             return output;
-                                         }
+                            }
+                        }, this);
+                        // paging bar on the bottom
+                        config.bbar = Ext.create('Ext.PagingToolbar', {
+                            store:config.store,
+                            displayInfo:true,
+                            displayMsg:'Displaying entry {0} - {1} of {2}',
+                            emptyMsg:"No entires to display"
+                        });
+                        //Actioncolumn icon
 
-                                    };
-                                    //parse columns
-                                    for (i=0;i<config.columns.length;i++) {
-                                        if (config.columns[i].text == el.model) {
-                                            config.columns[i] = hasManyColumn;
-                                            hasManyColumn = "";
-                                        }
-                                    }
-                                }
-                            },this);
-                            // paging bar on the bottom
-                            config.bbar = Ext.create('Ext.PagingToolbar', {
-                                store:config.store,
-                                displayInfo:true,
-                                displayMsg:'Displaying entry {0} - {1} of {2}',
-                                emptyMsg:"No entires to display"
-                            });
-                            //Actioncolumn icon
-                            var actionColumn = this.columns.filter(function (el) {
-                                return el.xtype == 'actioncolumn'
-                            })[0];
-                            actionColumn.items[0].icon = "http://samples.banchaproject.org/img/icons/delete.png";
-                        }
+                        var actionColumn = this.columns.filter(function (el) {
+                            return el.xtype == 'actioncolumn'
+                        })[0];
+                        actionColumn.items[0].icon = "http://samples.banchaproject.org/img/icons/delete.png";
                     }
                 }
-                Ext.apply(this, Ext.Object.merge({}, defaults, this.initialConfig));
-                // continue with standard behaviour
-                this.callParent();
             }
-        });
-
-
-        Bancha.onModelReady(['Movie', 'Actor', 'Director'], function (userModel) {
-            Ext.create('Ext.container.Viewport', {
-                layout:'fit',
-                items:[
-                    {
-                        xtype:'tabpanel', // TabPanel itself has no title
-                        activeTab:0, // First tab active by default
-                        items:[
-                            {
-                                xtype:'banchapanel',
-                                scaffold:{
-                                    target:'Movie',
-                                    title:'Movie Panel'
-                                }
-                            },
-                            {
-                                xtype:'banchapanel',
-                                scaffold:{
-                                    target:'Actor',
-                                    title:'Actor Panel'
-                                }
-                            },
-                            {
-                                xtype:'banchapanel',
-                                scaffold:{
-                                    target:'Director',
-                                    title:'Director Panel'
-                                }
-                            }
-                        ]
-                    }
-                ]
-            });
-
-
-        });
-        // eof
+            Ext.apply(this, Ext.Object.merge({}, defaults, this.initialConfig));
+            // continue with standard behaviour
+            this.callParent();
+        }
     });
+
+
+    Bancha.onModelReady(['Movie', 'Actor', 'Director'], function (userModel) {
+        Ext.create('Ext.container.Viewport', {
+            layout:'fit',
+            items:[
+                {
+                    xtype:'tabpanel', // TabPanel itself has no title
+                    activeTab:0, // First tab active by default
+                    items:[
+//                            {
+//                                xtype:'banchapanel',
+//                                title:'Movie Panel',
+//                                scaffold: {
+//                                    target: 'Movie'
+//                                }
+//                            },
+//                            {
+//                                xtype:'banchapanel',
+//                                scaffold:{
+//                                    target:'Actor',
+//                                    title:'Actor Panel'
+//                                }
+//                            },
+                        {
+                            xtype:'banchapanel',
+                            scaffold:{
+                                target:'Director',
+                                title:'Director Panel'
+                            }
+                        }
+                    ]
+                }
+            ]
+        });
+
+
+    });
+    // eof
+});
 </script>
 </body>
 </html>

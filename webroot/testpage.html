@@ -123,11 +123,10 @@ Ext.onReady(function () {
                                         config.columns[i].xtype = 'gridcolumn';
                                         delete config.columns[i].field; //this is required for combobox to work
 
-
                                         //if field was changed use value otherwise parse record id
                                         config.columns[i].renderer = function (value, metaData, record) {
 
-                                            if (value && record.dirty) {
+                                            if (value && record.dirty) { //record was changed but not yet saved
                                                 if (typeof(value) == "string") value = value.split(',');
 
                                                 for (var j=0;j<value.length;j++) {
@@ -138,7 +137,7 @@ Ext.onReady(function () {
                                                         return Ext.Array.contains(value,item.get('id'))
                                                     }
                                                 });
-                                            } else {
+                                            } else { //parse belongsTo data on associated model
                                                 hasManyStore.filter({
                                                     filterFn:function (item) {
                                                         return item.get(el.foreignKey) == record.get('id');
@@ -155,7 +154,6 @@ Ext.onReady(function () {
                                             hasManyStore.clearFilter();
                                             return output;
                                         };
-                                        console.debug(hasManyStore);
 
                                         config.columns[i].editor = {
                                             xtype:'combobox',

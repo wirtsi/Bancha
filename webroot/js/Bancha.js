@@ -1796,7 +1796,39 @@ Ext.define('Bancha', {
                 // add config for editable fields
                 if(config.enableCreate || config.enableUpdate) {
                     cellEditing = Ext.create('Ext.grid.plugin.CellEditing', {
-                        clicksToEdit: 2
+                        clicksToEdit: 2,
+                        listeners : {
+                            'beforeedit':function (e) {
+                                var me = this;
+                                console.debug(e);
+                                var value = e.value;
+                                //if (typeof(value) == "string") value = value.split(',');
+
+//                                for (var j=0;j<value.length;j++) {
+//                                    value[j] = parseInt(value[j]);
+//                                }
+                                e.value = value ? value: null;
+                                e.value = "4"
+                                e.originalValue = "4";
+                                e.record.set('movie_id',"4");
+
+
+
+                                return true;
+                            },
+                            'edit': function(editor,e) {
+                                console.debug(e);
+                                var value = e.value;
+                                if (typeof(value) == "string") value = value.split(',');
+
+                                for (var j=0;j<value.length;j++) {
+                                    value[j] = parseInt(value[j]);
+                                }
+                                e.value = value ? value: null;
+                            }
+
+
+                        }
                     });
                     Ext.apply(gridConfig, {
                         selType: 'cellmodel',

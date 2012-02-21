@@ -5,34 +5,34 @@
         public $paginate = array(); //don't forget to set this
 
         public function index() {
-            $this->Movie->recursive = 0;
+            $this->Movie->recursive = 1;
 
-            $this->paginate['joins'] = array(
-                array('table' => 'movies_actors',
-                    'alias' => 'JoinTable',
-                    'type' => 'INNER',
-                    'conditions' => array(
-                        'Movie.id = JoinTable.movie_id',
-                    )
-                ),
-                    array('table' => 'actors',
-                        'alias' => 'Actor',
-                        'type' => 'inner',
-                        'conditions' => array(
-                            'JoinTable.actor_id = Actor.id'
-                        )
+//            $this->paginate['joins'] = array(
+//                array('table' => 'movies_actors',
+//                    'alias' => 'JoinTable',
+//                    'type' => 'INNER',
+//                    'conditions' => array(
+//                        'Movie.id = JoinTable.movie_id',
+//                    )
+//                ),
+//                    array('table' => 'actors',
+//                        'alias' => 'Actor',
+//                        'type' => 'inner',
+//                        'conditions' => array(
+//                            'JoinTable.actor_id = Actor.id'
+//                        )
+//
+//                    )
+//            );
+//            $this->paginate['fields'] = array('Movie.*','Actor.id');
+//            $this->paginate['maxLimit'] = 1000;
 
-                    )
-            );
-            $this->paginate['fields'] = array('Movie.*','Actor.id');
-            $this->paginate['maxLimit'] = 1000;
-
+//            $results = $this->paginate();
+//            foreach ($results as $key => $value) {
+//                $results[$key]['Movie']['actor_id'] = $results[$key]['Actor']['id'];
+//                unset($results[$key]['Actor']);
+//            }
             $results = $this->paginate();
-            foreach ($results as $key => $value) {
-                $results[$key]['Movie']['actor_id'] = $results[$key]['Actor']['id'];
-                unset($results[$key]['Actor']);
-            }
-            firecake($results);
             return array_merge($this->request['paging']['Movie'], array('records' => $results));
         }
 

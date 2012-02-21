@@ -6,7 +6,10 @@
         Bancha Association Test Page
     </title>
     <link rel="stylesheet" type="text/css" href="../css/resources/css/ext-all.css"/>
+    <link rel="stylesheet" type="text/css" href="../js/boxselect.css"/>
+
     <script type='text/javascript' src='../js/ext-all-dev.js'></script>
+    <script type='text/javascript' src='../js/Boxselect.js'></script>
     <script type="text/javascript" src="js/Bancha.js"></script>
     <script type="text/javascript" src="../bancha-api/models/all.js"></script>
 </head>
@@ -102,14 +105,16 @@ Ext.onReady(function () {
                                         }
 
                                         config.columns[i].editor = {
-                                            xtype:'combobox',
+                                            xtype:'boxselect',
+                                            multiSelect: false,
                                             store:assocStore,
                                             lazyRender:true,
                                             displayField:'name',
                                             valueField:'id',
                                             emptyText:"Please select one",
                                             allowBlank:false,
-                                            queryMode:'local'
+                                            queryMode:'local',
+                                            name: el.foreignKey
                                         }
                                     }
                                 }
@@ -121,17 +126,17 @@ Ext.onReady(function () {
 
                                     if (config.columns[i].text == el.model) { //change hasMany column
                                         config.columns[i].xtype = 'gridcolumn';
-                                        delete config.columns[i].field; //this is required for combobox to work
+                                        delete config.columns[i].field; //field is deprecated
 
                                         //if field was changed use value otherwise parse record id
                                         config.columns[i].renderer = function (value, metaData, record) {
-
                                             if (value && record.dirty) { //record was changed but not yet saved
                                                 if (typeof(value) == "string") value = value.split(',');
 
                                                 for (var j=0;j<value.length;j++) {
                                                     value[j] = parseInt(value[j]);
                                                 }
+
                                                 hasManyStore.filter({
                                                     filterFn: function (item) {
                                                         return Ext.Array.contains(value,item.get('id'))
@@ -144,38 +149,35 @@ Ext.onReady(function () {
                                                     }
                                                 });
                                             }
-                                            var output = "";
+                                            var output_render = ""; //output string
+                                            var output_value = new Array(); //set the foreign key on grid
                                             hasManyStore.each(function (el) {
-                                                output += el.get('name') + ', ';
-
+                                                output_render += el.get('name') + ',';
+                                                output_value.push(el.get('id'));
                                             });
-                                            //record.set(el.foreignKey+'_temp',values);
-                                            output = output.substr(0, output.length - 2);
+                                            record.data['movie_id'] = output_value; //reverse logic, we have multiple entries here
                                             hasManyStore.clearFilter();
-                                            return output;
+                                            return output_render.substr(0,output_render.length-1);
                                         };
 
                                         config.columns[i].editor = {
-                                            xtype:'combobox',
+                                            xtype:'boxselect',
                                             store:hasManyStore,
                                             lazyRender:true,
                                             displayField:'name',
-                                            id: 'frimp',
-                                            valueField: 'id',
-                                            multiSelect:true,
+                                            valueField:'id',
+                                            emptyText:"Please select one",
                                             allowBlank:false,
                                             queryMode:'local',
-                                            listeners:{
-                                                scope: this,
-                                                focus:function (combo) {
-                                                    console.debug(combo);
-                                                    console.debug(this);
-
-                                                    setTimeout(function () {
-                                                        combo.setValue(combo.value)
-                                                    }, 300);
-                                                }
-                                            }
+                                            delimiter: ',',
+                                            name: el.foreignKey,
+//                                            listeners: {
+//                                                focus: function(combo,a,b) {
+//                                                    console.debug(combo);
+//                                                    console.debug(a);
+//                                                    console.debug(b);
+//                                                }
+//                                            }
                                         }
                                     }
                                 }
@@ -204,7 +206,7 @@ Ext.onReady(function () {
     });
 
 
-    Bancha.onModelReady(['Movie', 'Actor', 'Director'], function (userModel) {
+    Bancha.onModelReady(['Director'], function (userModel) {
         Ext.create('Ext.container.Viewport', {
             layout:'fit',
             items:[

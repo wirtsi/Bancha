@@ -27,22 +27,22 @@
         }
 
         public function edit($id = null) {
-firecake($this->request->data);
+        firecake($this->request->data);
             $this->Director->id = $id;
             if (!$this->Director->exists()) {
                 throw new NotFoundException(__('Invalid user'));
             }
+            //save hasMany data
             if (isset($this->request->data['Director']['movie_id'])) {
-                //$movies = explode(",",$this->request->data['Director']['movie_id']);
                 $movieData = array();
+                $movieData['Director'] = array('id'=>$id);
                 foreach ($this->request->data['Director']['movie_id'] as $movie) {
-//                    $this->Director->Movie->id = $movie;
-//                    $this->Director->Movie->saveField('director_id',$id);
-                    $movieData[] = array('id'=>$movie,'director_id'=>$id);
+                    $movieData['Movie'][] = array('director_id'=>$id,'id'=>$movie);
+
                 }
-                firecake($movieData);
-                $this->Director->Movie->saveAll($movieData);
+                $this->Director->saveAssociated($movieData);
             }
+            //save Bancha data
             if ($this->request->params['isBancha']) return $this->Director->saveFieldsAndReturn($this->request->data); // added
 
         }

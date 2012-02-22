@@ -56,7 +56,40 @@ Ext.onReady(function () {
                 scaffold:{
                     storeDefaults:{
                         autoLoad:true,
-                        storeId:this.scaffold.target
+                        storeId:this.scaffold.target,
+
+                    },
+                    onSave: function() { // scope is the store
+                        console.debug("save")
+                        var valid = true,
+                            msg = "",
+                            name,
+                            store = this;
+
+                        // check if all changes are valid
+                        store.each(function(el) {
+                            if(!el.isValid()) {
+                                valid = false;
+                                name = el.get('name') || el.get('title') || (el.phantom ? "New entry" : el.getId());
+                                msg += "<br><br><b>"+name+":</b>";
+                                el.validate().each(function(error) {
+                                    msg += "<br>&nbsp;&nbsp;&nbsp;"+error.field+" "+error.message;
+                                });
+                            }
+                        });
+
+                        if(!valid) {
+                            Ext.MessageBox.show({
+                                title: 'Invalid Data',
+                                msg: '<div style="text-align:left; padding-left:50px;">There are errors in your data:'+msg+"</div>",
+                                icon: Ext.MessageBox.ERROR,
+                                buttons: Ext.Msg.OK
+                            });
+                        } else {
+                            // commit create and update
+                            store.sync();
+                            console.debug(store);
+                        }
                     },
                     //here we collect the associated model and create stores. this is saved in this.assocs, which is
                     //later read by afterBuild
@@ -122,12 +155,13 @@ Ext.onReady(function () {
                             //hasMany && habtm with ugly rewrites on the server
                             if (el.type == "hasMany") {
                                 var hasManyStore = Ext.StoreMgr.get(el.model).load({params:{start:0, limit:500}});
-                                for (var i = 0; i < config.columns.length; i++) {
 
+                                for (var i = 0; i < config.columns.length; i++) {
                                     if (config.columns[i].text == el.model) { //change hasMany column
                                         config.columns[i].xtype = 'gridcolumn';
                                         delete config.columns[i].field; //field is deprecated
-
+                                        console.debug(el);
+                                        console.debug(hasManyStore);
                                         //if field was changed use value otherwise parse record id
                                         config.columns[i].renderer = function (value, metaData, record) {
                                             if (value && record.dirty) { //record was changed but not yet saved
@@ -143,6 +177,7 @@ Ext.onReady(function () {
                                                     }
                                                 });
                                             } else { //parse belongsTo data on associated model
+                                                console.debug("filter "+el.foreignKey+' for '+record.get('id'));
                                                 hasManyStore.filter({
                                                     filterFn:function (item) {
                                                         return item.get(el.foreignKey) == record.get('id');
@@ -155,6 +190,7 @@ Ext.onReady(function () {
                                                 output_render += el.get('name') + ',';
                                                 output_value.push(el.get('id'));
                                             });
+                                            record.data['actor_id'] = output_value; //reverse logic, we have multiple entries here
                                             record.data['movie_id'] = output_value; //reverse logic, we have multiple entries here
                                             hasManyStore.clearFilter();
                                             return output_render.substr(0,output_render.length-1);

@@ -1,0 +1,136 @@
+{"total":25, "results":[
+    {
+
+            "id":"1",
+            "director_id":"1",
+            "name":"Apocalipse Now",
+            "year":"1979"
+
+    },
+    {
+
+            "id":"2",
+            "director_id":"2",
+            "name":"Natural Born Killers",
+            "year":"2001"
+
+
+    },
+    {
+
+            "id":"3",
+            "director_id":"5",
+            "name":"Slumdog Millionaire",
+            "year":"2003"
+
+
+
+    },
+    {
+
+            "id":"4",
+            "director_id":"12",
+            "name":"Batman - The Dark Knight",
+            "year":"2008"
+
+    },
+    {
+
+            "id":"5",
+            "director_id":"13",
+            "name":"American Psycho",
+            "year":"2000"
+
+    },
+    {
+
+            "id":"6",
+            "director_id":"1",
+            "name":"Youth Without Youth",
+            "year":"2008"
+
+
+    },
+    {
+
+            "id":"7",
+            "director_id":"1",
+            "name":"The Godfather",
+            "year":"1972"
+
+    },
+    {
+
+            "id":"8",
+            "director_id":"1",
+            "name":"The Godfather II",
+            "year":"1975"
+
+    },
+    {
+
+            "id":"9",
+            "director_id":"1",
+            "name":"The Godfather III",
+            "year":"1990"
+
+    },
+    {
+
+            "id":"10",
+            "director_id":"1",
+            "name":"Bram Stoker\u00b4s Dracula",
+            "year":"1992"
+
+    },
+    {
+
+            "id":"11",
+            "director_id":"2",
+            "name":"The Doors",
+            "year":"1991"
+
+    },
+    {
+
+            "id":"12",
+            "director_id":"2",
+            "name":"Born on the Fourth of July",
+            "year":"1989"
+
+    },
+    {
+
+            "id":"13",
+            "director_id":"2",
+            "name":"Any Given Sunday",
+            "year":"1999"
+
+    },
+    {
+
+            "id":"14",
+            "director_id":"5",
+            "name":"28 Days Later",
+            "year":"2002"
+
+    },
+    {
+
+            "id":"15",
+            "director_id":"5",
+            "name":"The Beach",
+            "year":"2000"
+
+    },
+    {
+
+            "id":"16",
+            "director_id":"5",
+            "name":"Trainspotting",
+            "year":"1996"
+
+    }
+
+
+]}

@@ -1,0 +1,717 @@
+{"total":27, "results":[
+    {
+        "Actor":{
+            "id":"1",
+            "name":"Dennis Hopper"
+        },
+        "Movie":[
+            {
+                "id":"2",
+                "director_id":"2",
+                "name":"Natural Born Killers",
+                "year":"2001",
+                "MoviesActor":{
+                    "id":"38",
+                    "movie_id":"2",
+                    "actor_id":"1"
+                }
+            },
+            {
+                "id":"3",
+                "director_id":"5",
+                "name":"Slumdog Millionaire",
+                "year":"2003",
+                "MoviesActor":{
+                    "id":"66",
+                    "movie_id":"3",
+                    "actor_id":"1"
+                }
+            }
+        ]
+    },
+    {
+        "Actor":{
+            "id":"2",
+            "name":"Marlon Brando"
+        },
+        "Movie":[
+            {
+                "id":"1",
+                "director_id":"1",
+                "name":"Apocalipse Now",
+                "year":"1979",
+                "MoviesActor":{
+                    "id":"82",
+                    "movie_id":"1",
+                    "actor_id":"2"
+                }
+            },
+            {
+                "id":"2",
+                "director_id":"2",
+                "name":"Natural Born Killers",
+                "year":"2001",
+                "MoviesActor":{
+                    "id":"83",
+                    "movie_id":"2",
+                    "actor_id":"2"
+                }
+            },
+            {
+                "id":"3",
+                "director_id":"5",
+                "name":"Slumdog Millionaire",
+                "year":"2003",
+                "MoviesActor":{
+                    "id":"84",
+                    "movie_id":"3",
+                    "actor_id":"2"
+                }
+            },
+            {
+                "id":"7",
+                "director_id":"1",
+                "name":"The Godfather",
+                "year":"1972",
+                "MoviesActor":{
+                    "id":"119",
+                    "movie_id":"7",
+                    "actor_id":"2"
+                }
+            }
+        ]
+    },
+    {
+        "Actor":{
+            "id":"3",
+            "name":"Mr. T"
+        },
+        "Movie":[
+            {
+                "id":"1",
+                "director_id":"1",
+                "name":"Apocalipse Now",
+                "year":"1979",
+                "MoviesActor":{
+                    "id":"55",
+                    "movie_id":"1",
+                    "actor_id":"3"
+                }
+            },
+            {
+                "id":"2",
+                "director_id":"2",
+                "name":"Natural Born Killers",
+                "year":"2001",
+                "MoviesActor":{
+                    "id":"57",
+                    "movie_id":"2",
+                    "actor_id":"3"
+                }
+            }
+        ]
+    },
+    {
+        "Actor":{
+            "id":"9",
+            "name":"Christian Bale"
+        },
+        "Movie":[
+            {
+                "id":"4",
+                "director_id":"12",
+                "name":"Batman - The Dark Knight",
+                "year":"2008",
+                "MoviesActor":{
+                    "id":"76",
+                    "movie_id":"4",
+                    "actor_id":"9"
+                }
+            },
+            {
+                "id":"5",
+                "director_id":"13",
+                "name":"American Psycho",
+                "year":"2000",
+                "MoviesActor":{
+                    "id":"78",
+                    "movie_id":"5",
+                    "actor_id":"9"
+                }
+            }
+        ]
+    },
+    {
+        "Actor":{
+            "id":"10",
+            "name":"Heath Ledger"
+        },
+        "Movie":[
+            {
+                "id":"4",
+                "director_id":"12",
+                "name":"Batman - The Dark Knight",
+                "year":"2008",
+                "MoviesActor":{
+                    "id":"77",
+                    "movie_id":"4",
+                    "actor_id":"10"
+                }
+            }
+        ]
+    },
+    {
+        "Actor":{
+            "id":"11",
+            "name":"Tim Roth"
+        },
+        "Movie":[
+            {
+                "id":"6",
+                "director_id":"1",
+                "name":"Youth Without Youth",
+                "year":"2008",
+                "MoviesActor":{
+                    "id":"133",
+                    "movie_id":"6",
+                    "actor_id":"11"
+                }
+            },
+            {
+                "id":"23",
+                "director_id":"6",
+                "name":"Four Rooms",
+                "year":"1996",
+                "MoviesActor":{
+                    "id":"134",
+                    "movie_id":"23",
+                    "actor_id":"11"
+                }
+            },
+            {
+                "id":"24",
+                "director_id":"6",
+                "name":"Pulp Fiction",
+                "year":"1994",
+                "MoviesActor":{
+                    "id":"135",
+                    "movie_id":"24",
+                    "actor_id":"11"
+                }
+            },
+            {
+                "id":"25",
+                "director_id":"6",
+                "name":"Reservoir Dogs",
+                "year":"1991",
+                "MoviesActor":{
+                    "id":"136",
+                    "movie_id":"25",
+                    "actor_id":"11"
+                }
+            }
+        ]
+    },
+    {
+        "Actor":{
+            "id":"12",
+            "name":"Bruno Glanz"
+        },
+        "Movie":[
+            {
+                "id":"6",
+                "director_id":"1",
+                "name":"Youth Without Youth",
+                "year":"2008",
+                "MoviesActor":{
+                    "id":"123",
+                    "movie_id":"6",
+                    "actor_id":"12"
+                }
+            }
+        ]
+    },
+    {
+        "Actor":{
+            "id":"13",
+            "name":"Josh Lucas"
+        },
+        "Movie":[
+            {
+                "id":"5",
+                "director_id":"13",
+                "name":"American Psycho",
+                "year":"2000",
+                "MoviesActor":{
+                    "id":"81",
+                    "movie_id":"5",
+                    "actor_id":"13"
+                }
+            }
+        ]
+    },
+    {
+        "Actor":{
+            "id":"14",
+            "name":"Al Pacino"
+        },
+        "Movie":[
+            {
+                "id":"7",
+                "director_id":"1",
+                "name":"The Godfather",
+                "year":"1972",
+                "MoviesActor":{
+                    "id":"120",
+                    "movie_id":"7",
+                    "actor_id":"14"
+                }
+            },
+            {
+                "id":"8",
+                "director_id":"1",
+                "name":"The Godfather II",
+                "year":"1975",
+                "MoviesActor":{
+                    "id":"126",
+                    "movie_id":"8",
+                    "actor_id":"14"
+                }
+            },
+            {
+                "id":"9",
+                "director_id":"1",
+                "name":"The Godfather III",
+                "year":"1990",
+                "MoviesActor":{
+                    "id":"128",
+                    "movie_id":"9",
+                    "actor_id":"14"
+                }
+            },
+            {
+                "id":"13",
+                "director_id":"2",
+                "name":"Any Given Sunday",
+                "year":"1999",
+                "MoviesActor":{
+                    "id":"124",
+                    "movie_id":"13",
+                    "actor_id":"14"
+                }
+            }
+        ]
+    },
+    {
+        "Actor":{
+            "id":"15",
+            "name":"Robert De Niro"
+        },
+        "Movie":[
+            {
+                "id":"8",
+                "director_id":"1",
+                "name":"The Godfather II",
+                "year":"1975",
+                "MoviesActor":{
+                    "id":"127",
+                    "movie_id":"8",
+                    "actor_id":"15"
+                }
+            }
+        ]
+    },
+    {
+        "Actor":{
+            "id":"16",
+            "name":"Andy Garcia"
+        },
+        "Movie":[
+            {
+                "id":"9",
+                "director_id":"1",
+                "name":"The Godfather III",
+                "year":"1990",
+                "MoviesActor":{
+                    "id":"129",
+                    "movie_id":"9",
+                    "actor_id":"16"
+                }
+            }
+        ]
+    },
+    {
+        "Actor":{
+            "id":"17",
+            "name":"Val Kilmer"
+        },
+        "Movie":[
+            {
+                "id":"11",
+                "director_id":"2",
+                "name":"The Doors",
+                "year":"1991",
+                "MoviesActor":{
+                    "id":"91",
+                    "movie_id":"11",
+                    "actor_id":"17"
+                }
+            }
+        ]
+    },
+    {
+        "Actor":{
+            "id":"18",
+            "name":"Meg Ryan"
+        },
+        "Movie":[
+            {
+                "id":"11",
+                "director_id":"2",
+                "name":"The Doors",
+                "year":"1991",
+                "MoviesActor":{
+                    "id":"92",
+                    "movie_id":"11",
+                    "actor_id":"18"
+                }
+            }
+        ]
+    },
+    {
+        "Actor":{
+            "id":"19",
+            "name":"Tom Cruise"
+        },
+        "Movie":[
+            {
+                "id":"12",
+                "director_id":"2",
+                "name":"Born on the Fourth of July",
+                "year":"1989",
+                "MoviesActor":{
+                    "id":"121",
+                    "movie_id":"12",
+                    "actor_id":"19"
+                }
+            }
+        ]
+    },
+    {
+        "Actor":{
+            "id":"20",
+            "name":"Keanu Reeves"
+        },
+        "Movie":[
+            {
+                "id":"10",
+                "director_id":"1",
+                "name":"Bram Stoker\u00b4s Dracula",
+                "year":"1992",
+                "MoviesActor":{
+                    "id":"118",
+                    "movie_id":"10",
+                    "actor_id":"20"
+                }
+            }
+        ]
+    },
+    {
+        "Actor":{
+            "id":"21",
+            "name":"Naomie Harris"
+        },
+        "Movie":[
+            {
+                "id":"14",
+                "director_id":"5",
+                "name":"28 Days Later",
+                "year":"2002",
+                "MoviesActor":{
+                    "id":"96",
+                    "movie_id":"14",
+                    "actor_id":"21"
+                }
+            }
+        ]
+    },
+    {
+        "Actor":{
+            "id":"22",
+            "name":"Cameron Diaz"
+        },
+        "Movie":[
+            {
+                "id":"13",
+                "director_id":"2",
+                "name":"Any Given Sunday",
+                "year":"1999",
+                "MoviesActor":{
+                    "id":"125",
+                    "movie_id":"13",
+                    "actor_id":"22"
+                }
+            }
+        ]
+    },
+    {
+        "Actor":{
+            "id":"23",
+            "name":"Leonardo DiCaprio"
+        },
+        "Movie":[
+            {
+                "id":"15",
+                "director_id":"5",
+                "name":"The Beach",
+                "year":"2000",
+                "MoviesActor":{
+                    "id":"102",
+                    "movie_id":"15",
+                    "actor_id":"23"
+                }
+            }
+        ]
+    },
+    {
+        "Actor":{
+            "id":"24",
+            "name":"Ewan McGregor"
+        },
+        "Movie":[
+            {
+                "id":"16",
+                "director_id":"5",
+                "name":"Trainspotting",
+                "year":"1996",
+                "MoviesActor":{
+                    "id":"103",
+                    "movie_id":"16",
+                    "actor_id":"24"
+                }
+            }
+        ]
+    },
+    {
+        "Actor":{
+            "id":"25",
+            "name":"Kurt Russel"
+        },
+        "Movie":[
+            {
+                "id":"17",
+                "director_id":"6",
+                "name":"Death Proof",
+                "year":"2007",
+                "MoviesActor":{
+                    "id":"104",
+                    "movie_id":"17",
+                    "actor_id":"25"
+                }
+            }
+        ]
+    },
+    {
+        "Actor":{
+            "id":"26",
+            "name":"Bruce Willis"
+        },
+        "Movie":[
+            {
+                "id":"18",
+                "director_id":"6",
+                "name":"Grindhouse",
+                "year":"2007",
+                "MoviesActor":{
+                    "id":"117",
+                    "movie_id":"18",
+                    "actor_id":"26"
+                }
+            },
+            {
+                "id":"24",
+                "director_id":"6",
+                "name":"Pulp Fiction",
+                "year":"1994",
+                "MoviesActor":{
+                    "id":"116",
+                    "movie_id":"24",
+                    "actor_id":"26"
+                }
+            }
+        ]
+    },
+    {
+        "Actor":{
+            "id":"27",
+            "name":"Brad Pitt"
+        },
+        "Movie":[
+            {
+                "id":"19",
+                "director_id":"6",
+                "name":"Inglourious Basterds",
+                "year":"2009",
+                "MoviesActor":{
+                    "id":"106",
+                    "movie_id":"19",
+                    "actor_id":"27"
+                }
+            }
+        ]
+    },
+    {
+        "Actor":{
+            "id":"28",
+            "name":"Willem Dafoe"
+        },
+        "Movie":[
+            {
+                "id":"20",
+                "director_id":"2",
+                "name":"Platoon",
+                "year":"1996",
+                "MoviesActor":{
+                    "id":"107",
+                    "movie_id":"20",
+                    "actor_id":"28"
+                }
+            }
+        ]
+    },
+    {
+        "Actor":{
+            "id":"29",
+            "name":"Charlie Sheen"
+        },
+        "Movie":[
+            {
+                "id":"20",
+                "director_id":"2",
+                "name":"Platoon",
+                "year":"1996",
+                "MoviesActor":{
+                    "id":"108",
+                    "movie_id":"20",
+                    "actor_id":"29"
+                }
+            }
+        ]
+    },
+    {
+        "Actor":{
+            "id":"30",
+            "name":"Uma Thurman"
+        },
+        "Movie":[
+            {
+                "id":"21",
+                "director_id":"6",
+                "name":"Kill Bill",
+                "year":"2003",
+                "MoviesActor":{
+                    "id":"131",
+                    "movie_id":"21",
+                    "actor_id":"30"
+                }
+            },
+            {
+                "id":"24",
+                "director_id":"6",
+                "name":"Pulp Fiction",
+                "year":"1994",
+                "MoviesActor":{
+                    "id":"132",
+                    "movie_id":"24",
+                    "actor_id":"30"
+                }
+            }
+        ]
+    },
+    {
+        "Actor":{
+            "id":"31",
+            "name":"Samuel Jackson"
+        },
+        "Movie":[
+            {
+                "id":"22",
+                "director_id":"6",
+                "name":"Jackie Brown",
+                "year":"1997",
+                "MoviesActor":{
+                    "id":"115",
+                    "movie_id":"22",
+                    "actor_id":"31"
+                }
+            },
+            {
+                "id":"24",
+                "director_id":"6",
+                "name":"Pulp Fiction",
+                "year":"1994",
+                "MoviesActor":{
+                    "id":"114",
+                    "movie_id":"24",
+                    "actor_id":"31"
+                }
+            }
+        ]
+    },
+    {
+        "Actor":{
+            "id":"32",
+            "name":"Tim Roth"
+        },
+        "Movie":[
+            {
+                "id":"23",
+                "director_id":"6",
+                "name":"Four Rooms",
+                "year":"1996",
+                "MoviesActor":{
+                    "id":"111",
+                    "movie_id":"23",
+                    "actor_id":"32"
+                }
+            },
+            {
+                "id":"25",
+                "director_id":"6",
+                "name":"Reservoir Dogs",
+                "year":"1991",
+                "MoviesActor":{
+                    "id":"130",
+                    "movie_id":"25",
+                    "actor_id":"32"
+                }
+            }
+        ]
+    }
+], "movies":{
+    "1":"Apocalipse Now",
+    "2":"Natural Born Killers",
+    "3":"Slumdog Millionaire",
+    "4":"Batman - The Dark Knight",
+    "5":"American Psycho",
+    "6":"Youth Without Youth",
+    "7":"The Godfather",
+    "8":"The Godfather II",
+    "9":"The Godfather III",
+    "10":"Bram Stoker\u00b4s Dracula",
+    "11":"The Doors",
+    "12":"Born on the Fourth of July",
+    "13":"Any Given Sunday",
+    "14":"28 Days Later",
+    "15":"The Beach",
+    "16":"Trainspotting",
+    "17":"Death Proof",
+    "18":"Grindhouse",
+    "19":"Inglourious Basterds",
+    "20":"Platoon",
+    "21":"Kill Bill",
+    "22":"Jackie Brown",
+    "23":"Four Rooms",
+    "24":"Pulp Fiction",
+    "25":"Reservoir Dogs"
+}}

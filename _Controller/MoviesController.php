@@ -54,7 +54,11 @@
         }
 
         public function edit($id = null) {
+            firecake($id);
+            firecake($this->request->data);
+
             $this->Movie->id = $id;
+
             if (!$this->Movie->exists()) {
                 throw new NotFoundException(__('Invalid user'));
             }

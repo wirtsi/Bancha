@@ -1,0 +1,202 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>
+        Bancha Association Test Page
+    </title>
+    <link rel="stylesheet" type="text/css" href="../css/resources/css/ext-all.css"/>
+    <link rel="stylesheet" type="text/css" href="../js/boxselect.css"/>
+
+    <script type='text/javascript' src='../js/ext-all-dev.js'></script>
+    <script type='text/javascript' src='../js/Boxselect.js'></script>
+</head>
+<body>
+<script type='text/javascript'>
+    /*!
+     *
+     * Bancha Project : Combining Ext JS and CakePHP (http://banchaproject.org)
+     * Copyright 2011-2012 Roland Schuetz, Kung Wong, Andreas Kern, Florian Eckerstorfer
+     *
+     * Licensed under The MIT License
+     * Redistributions of files must retain the above copyright notice.
+     *
+     * @package       Bancha
+     * @copyright     Copyright 2011-2012 Roland Schuetz, Kung Wong, Andreas Kern, Florian Eckerstorfer
+     * @link          http://banchaproject.org Bancha Project
+     * @since         Bancha v 0.2.0
+     * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
+     * @author        Roland Schuetz <mail@rolandschuetz.at>
+     * @version       Bancha v 0.9.3
+     *
+     * For more information go to http://banchaproject.org
+     */
+    /*jslint browser: true, vars: false, plusplus: true, white: true, sloppy: true */
+    /*global Ext, Bancha */
+
+    // API and Bancha is already included,
+    // now load sample dependencies
+    Ext.require([
+        'Ext.form.*',
+        'Ext.grid.*'
+    ]);
+
+
+
+    Ext.onReady(function () {
+
+
+    Ext.define('Movie', {
+            extend:'Ext.data.Model',
+            fields:[
+                {"name":"id", "mapping":"id"},
+                {"name":"director_id", "mapping":"director_id"},
+                {"name":"name", "mapping":"name"},
+                {"name":"year", "mapping":"year"},
+                //{"name":"actors", "mapping":"Actor"}
+            ],
+            belongsTo:{
+                model:'Director',
+            },
+//            hasMany:{
+//                model:'Actor',
+//                name:'actors'
+//            }
+        });
+        Ext.define('Director', {
+            extend:'Ext.data.Model',
+            fields:[
+                {"name":"id", "mapping":"id"},
+                {"name":"name", "mapping":"name"},
+                {"name":"alive", "mapping":"alive"},
+                //{"name":"movies", "mapping":"Movie", type:'array'}
+            ],
+            hasMany:[{
+                    model:'Movie',
+                    name: 'movies'
+                }]
+        });
+
+
+
+
+
+        directorStore = Ext.create('Ext.data.Store', {
+            model:'Director',
+            storeId: 'directors',
+            proxy:{
+                type:'ajax',
+                url:'testdata.json',
+                reader:{
+                    root:'results',
+                    type:'json'
+                }
+            },
+            autoLoad:true
+        });
+
+        movieStore = Ext.create('Ext.data.Store',{
+            model: 'Movie',
+            storeId: 'movies',
+            proxy:{
+                type:'ajax',
+                url:'movies.json',
+                reader:{
+                    root:'results',
+                    type:'json'
+                }
+            },
+            autoLoad:false
+        })
+
+        console.debug(directorStore);
+        Ext.create('Ext.container.Viewport', {
+                    layout:'fit',
+                    items:[
+                        {
+                            xtype:'gridpanel',
+                            store:directorStore,
+                            id: 'mygrid',
+                            selType: "cellmodel",
+                            plugins: [
+                                Ext.create('Ext.grid.plugin.CellEditing', {
+                                    clicksToEdit: 2,
+                                    listeners: {
+                                        edit: function(editor,o) {
+                                            console.debug("afteredit")
+                                            console.debug(o.record.movies());
+                                            for (var i=0;i<o.value.length;i++) {
+                                                var idx = o.record.movies().findExact('id',o.value[i]);
+                                                if (idx == -1) {
+                                                    o.record.movies().add({
+                                                        id: o.value[i],
+                                                        director_id: o.record.get('id'),
+                                                        name: 'testing'
+                                                    })
+                                                }
+                                            }
+                                            o.record.movies().each(function(item) {
+                                                if (!Ext.Array.contains(o.value,item.get('id'))) {
+                                                    o.record.movies().remove(item);
+                                                }
+                                            })
+
+                                            //o.record.movies().sync();
+                                            o.grid.doLayout();
+                                        }
+                                    }
+                                })
+                            ],
+                            columns:[
+                                {header:'Name', dataIndex:"name", editor:{xtype:'textfield'}, flex:1},
+                                {header:"Alive", dataIndex:"alive", width:50},
+                                {header:"Movies", dataIndex:"movies",
+                                    flex:1,
+                                    "renderer":function (a, b, c) {
+                                        console.debug("renderer");
+                                        var output = "";
+                                        var outputvalues = "";
+                                        console.debug(c.movies());
+                                        console.debug(c.movies().count());
+                                        var hasMany = c.movies();
+                                        //console.debug(c.movies())
+                                        hasMany.each(function (el) {
+                                            output += el.get('name') + ',';
+                                            outputvalues += el.get('id') + ',';
+                                        })
+//                                        var hasMany = c.data.movies;
+//                                        for (var i=0;i<hasMany.length;i++) {
+//                                            output += hasMany[i].id+',';
+//                                        }
+                                        c.data['movies'] = outputvalues.substr(0, outputvalues.length - 1); //dont use set or this will cause a loop.changing the record will trigger a reload
+                                        return output.substr(0, output.length - 1);
+                                    },
+                                    editor: {
+                                        xtype: 'boxselect',
+                                        store: movieStore,
+                                        queryMode: 'remote',
+                                        valueField: 'id',
+                                        displayField: 'name',
+                                        name: 'movies',
+                                        delimiter: ",",
+                                        listeners: {
+                                            blur: function(combo) {
+                                                console.debug(combo);
+                                                console.debug(combo.getValue())
+
+                                            }
+                                        }
+
+                                    }
+                                }
+                            ]
+
+                        }
+                    ]
+                }
+        );
+
+    });
+</script>
+</body>
+</html>

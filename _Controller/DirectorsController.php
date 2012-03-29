@@ -4,7 +4,7 @@
         var $name = 'Directors';
 
         public function index() {
-            $this->Director->recursive = 0;
+            $this->Director->recursive = 1;
             $directors = $this->paginate();
             return array_merge($this->request['paging']['Director'], array('records' => $directors));
         }
@@ -27,22 +27,12 @@
         }
 
         public function edit($id = null) {
-        firecake($this->request->data);
             $this->Director->id = $id;
             if (!$this->Director->exists()) {
                 throw new NotFoundException(__('Invalid user'));
             }
-            //save hasMany data
-            if (isset($this->request->data['Director']['movie_id'])) {
-                $movieData = array();
-                $movieData['Director'] = array('id'=>$id);
-                foreach ($this->request->data['Director']['movie_id'] as $movie) {
-                    $movieData['Movie'][] = array('director_id'=>$id,'id'=>$movie);
-
-                }
-                $this->Director->saveAssociated($movieData);
-            }
             //save Bancha data
+            //return $this->Director->saveFieldsAndReturn($this->request->data);
             if ($this->request->params['isBancha']) return $this->Director->saveFieldsAndReturn($this->request->data); // added
 
         }

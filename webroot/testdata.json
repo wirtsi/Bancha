@@ -1,0 +1,203 @@
+{"total":6, "results":[
+    {
+            "id":"1",
+            "name":"Francis Ford Coppola",
+            "alive":"1",
+        "movies": [
+            {
+                "id":"1",
+                "director_id":"1",
+                "name":"Apocalipse Now",
+                "year":"1979"
+            },
+            {
+                "id":"6",
+                "director_id":"1",
+                "name":"Youth Without Youth",
+                "year":"2008"
+            },
+            {
+                "id":"7",
+                "director_id":"1",
+                "name":"The Godfather",
+                "year":"1972"
+            },
+            {
+                "id":"8",
+                "director_id":"1",
+                "name":"The Godfather II",
+                "year":"1975"
+            },
+            {
+                "id":"9",
+                "director_id":"1",
+                "name":"The Godfather III",
+                "year":"1990"
+            },
+            {
+                "id":"10",
+                "director_id":"1",
+                "name":"Bram Stoker\u00b4s Dracula",
+                "year":"1992"
+            }
+        ]
+    },
+    {
+
+            "id":"2",
+            "name":"Oliver Stone",
+            "alive":"1",
+
+        "movies":[
+            {
+                "id":"2",
+                "director_id":"2",
+                "name":"Natural Born Killers",
+                "year":"2001"
+            },
+            {
+                "id":"11",
+                "director_id":"2",
+                "name":"The Doors",
+                "year":"1991"
+            },
+            {
+                "id":"12",
+                "director_id":"2",
+                "name":"Born on the Fourth of July",
+                "year":"1989"
+            },
+            {
+                "id":"13",
+                "director_id":"2",
+                "name":"Any Given Sunday",
+                "year":"1999"
+            },
+            {
+                "id":"20",
+                "director_id":"2",
+                "name":"Platoon",
+                "year":"1996"
+            }
+        ]
+    },
+    {
+
+            "id":"5",
+            "name":"Danny Boyle",
+            "alive":"1",
+        "movies":[
+            {
+                "id":"3",
+                "director_id":"5",
+                "name":"Slumdog Millionaire",
+                "year":"2003"
+            },
+            {
+                "id":"14",
+                "director_id":"5",
+                "name":"28 Days Later",
+                "year":"2002"
+            },
+            {
+                "id":"15",
+                "director_id":"5",
+                "name":"The Beach",
+                "year":"2000"
+            },
+            {
+                "id":"16",
+                "director_id":"5",
+                "name":"Trainspotting",
+                "year":"1996"
+            }
+        ]
+    },
+    {
+        "Director":{
+            "id":"6",
+            "name":"Quentin Tarantino",
+            "alive":"1"
+        },
+        "Movie":[
+            {
+                "id":"17",
+                "director_id":"6",
+                "name":"Death Proof",
+                "year":"2007"
+            },
+            {
+                "id":"18",
+                "director_id":"6",
+                "name":"Grindhouse",
+                "year":"2007"
+            },
+            {
+                "id":"19",
+                "director_id":"6",
+                "name":"Inglourious Basterds",
+                "year":"2009"
+            },
+            {
+                "id":"21",
+                "director_id":"6",
+                "name":"Kill Bill",
+                "year":"2003"
+            },
+            {
+                "id":"22",
+                "director_id":"6",
+                "name":"Jackie Brown",
+                "year":"1997"
+            },
+            {
+                "id":"23",
+                "director_id":"6",
+                "name":"Four Rooms",
+                "year":"1996"
+            },
+            {
+                "id":"24",
+                "director_id":"6",
+                "name":"Pulp Fiction",
+                "year":"1994"
+            },
+            {
+                "id":"25",
+                "director_id":"6",
+                "name":"Reservoir Dogs",
+                "year":"1991"
+            }
+        ]
+    },
+    {
+        "Director":{
+            "id":"12",
+            "name":"Christopher Nolan",
+            "alive":"1"
+        },
+        "Movie":[
+            {
+                "id":"4",
+                "director_id":"12",
+                "name":"Batman - The Dark Knight",
+                "year":"2008"
+            }
+        ]
+    },
+    {
+        "Director":{
+            "id":"13",
+            "name":"Mary Harron",
+            "alive":"1"
+        },
+        "Movie":[
+            {
+                "id":"5",
+                "director_id":"13",
+                "name":"American Psycho",
+                "year":"2000"
+            }
+        ]
+    }
+]}

@@ -80,6 +80,12 @@ class BanchaRemotableBehavior extends ModelBehavior {
 		 */
 		'useOnlyDefinedFields' => true,
 	);
+
+    /**
+     * we only want to return data from parent model, not associated ones
+     * @var null
+     */
+    private $parentModel = null;
 /**
  * Sets up the BanchaRemotable behavior. For config options see
  * https://github.com/Bancha/Bancha/wiki/BanchaRemotableBehavior-Configurations
@@ -205,12 +211,15 @@ class BanchaRemotableBehavior extends ModelBehavior {
     private function getAssociated() {
         $assocs = $this->model->getAssociated();
         $return = array();
+
         foreach ($assocs as $field => $value) {
+
             //if($value != 'hasAndBelongsToMany') { // extjs doesn't support hasAndBelongsToMany
             $name = lcfirst(Inflector::pluralize($field)); //generate a handy name
             $foreignKey = $this->model->{$value}[$field]['foreignKey']; //get foreign key
             $return[] = array(
                 'type' => ($value == "hasAndBelongsToMany" ? 'hasMany' : $value),
+                //'type'=>$value,
                 'model' => $field,
                 'name' => $name,
                 'foreignKey' => $foreignKey,
@@ -244,7 +253,7 @@ class BanchaRemotableBehavior extends ModelBehavior {
         foreach ($assocs as $field => $value) {
             if($value == 'hasAndBelongsToMany' || $value == 'hasMany') { // extjs doesn't support hasAndBelongsToMany
                 $name = lcfirst($field); //generate a handy name
-                array_push($cols,array('name'=>$name.'_id','type'=>'string')); //string because ids are concated like 5,6,7
+                array_push($cols,array('name'=>$name.'_ids','type'=>'string')); //string because ids are concated like 5,6,7
             }
 
         }
@@ -424,18 +433,22 @@ class BanchaRemotableBehavior extends ModelBehavior {
 	public function afterSave($model, $created) {
 		// get all the data bancha needs for the response
 		// and save it in the data property
+        firecake("aftersave");
 		if($created) {
 			// just add the id
 			$this->result = $model->data;
 			$this->result[$model->name]['id'] = $model->id;
 		} else {
+            firecake($model);
 			// load the full record from the database
-			$currentRecursive = $model->recursive;
-			$model->recursive = -1;
-			$this->result = $model->read();
-			$model->recursive = $currentRecursive;
-		}
+            //if this was an hasMany Save
 
+            $currentRecursive = $model->recursive;
+            $model->recursive = -1;
+            $this->result = $model->find("first",array('conditions'=>array('id'=>$model->id)));
+            //$this->result = $this->afterFind($model,$model->data,true);
+            $model->recursive = $currentRecursive;
+		}
 		return true;
 	}
 
@@ -447,6 +460,89 @@ class BanchaRemotableBehavior extends ModelBehavior {
 		return $this->result;
 	}
 
+    /**
+     * director hasMany movie
+     * we add movie_ids to director data
+     * if recursive=1 then a query is made for every entry (which is probably quite a performance hit)
+     * this also happens on saves
+     * @param $model
+     * @param $data
+     * @param $primary
+     * @return mixed
+     */
+    public function afterFind($model,$data,$primary) {
+        foreach ($model->hasMany as $foreignmodel => $foreignvalues) { //assocs
+            firecake("afterfind hasmany");
+            //can cope without associated data but this is quite a performance hit
+            foreach ($data as $entrykey => $entryvalue) {
+                if (isset($data[$entrykey][$foreignmodel])) { //recursive hasmany data present, append it it primary data
+                    $temp = array();
+                    foreach ($data[$entrykey][$foreignmodel] as $assocKey => $assocValue) {
+                        $temp[] = $data[$entrykey][$foreignmodel][$assocKey]['id'];
+                    }
+                    $data[$entrykey][$model->name][strtolower($foreignmodel) . '_ids'] = implode(",", $temp);
+                } else {
+                    $entries = $model->$foreignmodel->find("list",array('conditions'=>
+                        array($foreignvalues['foreignKey']=>$model->id)));
+                    $data[$entrykey][$model->name][strtolower($foreignmodel) . '_ids'] = implode(",",array_keys($entries));
+                }
+            }
+        }
+        foreach ($model->hasAndBelongsToMany as $foreignmodel => $foreignvalues) { //assocs
+            firecake("afterfind habtm");
+            foreach ($data as $entrykey => $entryvalue) {
+                //for hasandbelongstomany recursive must be 1 or greater
+                if (isset($data[$entrykey][$foreignmodel])) { //recursive hasmany data present, append it it primary data
+                    $temp = array();
+                    foreach ($data[$entrykey][$foreignmodel] as $assocKey => $assocValue) {
+                        $temp[] = $data[$entrykey][$foreignmodel][$assocKey]['id'];
+                    }
+                    $data[$entrykey][$model->name][strtolower($foreignmodel) . '_ids'] = implode(",", $temp);
+                }
+            }
+        }
+        return $data;
+    }
+
+    public function saveAssociatedDataAndReturn($model) {
+        $originalData = $data = $model->data;
+        firecake("here");
+        firecake($data);
+        firecake($model);
+        //save hasMany data
+        //TODO: habtm
+        foreach ($model->hasMany as $foreignmodel => $foreignvalues) {
+            $this->parentModel = $model->name;
+            //only kick in if associated data was changed
+            if (isset($data[$model->name][strtolower($foreignmodel) . '_ids'])) {
+                //get associated ids
+                $assocIds = $data[$model->name][strtolower($foreignmodel) . '_ids'];
+                if (is_string($assocIds)) {
+                    $assocIds = explode(",", $assocIds);
+                }
+                if (is_numeric($assocIds)) {
+                    $assocIds = array($assocIds);
+                }
+                //clear associated data (otherwise deleted wouldn't get reflected
+                $model->$foreignmodel->updateAll(
+                    array($foreignmodel . '.' . $foreignvalues['foreignKey'] => null),
+                    array($foreignmodel . '.' . $foreignvalues['foreignKey'] => $model->id)
+                );
+                //assemble saveAssociated data
+                $hasManyData = array();
+                $hasManyData[$model->name] = array('id' => $model->id);
+                foreach ($assocIds as $entry) {
+                    $hasManyData[$foreignmodel][] = array($foreignvalues['foreignKey'] => $model->id, 'id' => $entry);
+                }
+
+                firecake($hasManyData);
+                $model->saveAssociated($hasManyData);
+            }
+        }
+        //this field is not in the original table
+        //unset($originalData[$model->name][strtolower($foreignmodel) . '_ids']);
+        //return $this->saveFieldsAndReturn($model,$originalData);
+    }
 	/**
 	 * Builds a field list with all defined fields
 	 */
@@ -475,14 +571,73 @@ class BanchaRemotableBehavior extends ModelBehavior {
 	 * @param $options the save options
 	 */
 	public function beforeSave($model,$options) {
+        firecake("beforeSave");
 		if($this->settings[$this->model->alias]['useOnlyDefinedFields']) {
 			// if not yet defined, create a field list to save only the changes
 			$options['fieldList'] = empty($options['fieldList']) ? $this->buildFieldList($model->data) : $options['fieldList'];
 		}
+        //TODO: habtm
+        firecake($model);
+        foreach ($model->hasMany as $foreignmodel => $foreignvalues) {
+            firecake("hasmany");
+            //only kick in if associated data was changed
+            if (isset($model->data[$model->name][strtolower($foreignmodel) . '_ids'])) {
+                //get associated ids
+
+                $assocIds = $model->data[$model->name][strtolower($foreignmodel) . '_ids'];
+                firecake($assocIds);
+                if (is_string($assocIds)) {
+                    $assocIds = explode(",", $assocIds);
+                }
+                if (is_numeric($assocIds)) {
+                    $assocIds = array($assocIds);
+                }
+                //clear associated data (otherwise deleted wouldn't get reflected
+                $model->$foreignmodel->updateAll(
+                    array($foreignmodel . '.' . $foreignvalues['foreignKey'] => null),
+                    array($foreignmodel . '.' . $foreignvalues['foreignKey'] => $model->id)
+                );
+                //assemble saveAssociated data
+                $hasManyData = array();
+                $hasManyData[$model->name] = array('id' => $model->id);
+                foreach ($assocIds as $entry) {
+                    $hasManyData[$foreignmodel][] = array($foreignvalues['foreignKey'] => $model->id, 'id' => $entry);
+                }
+                firecake("hasmanydata:");
+                firecake($hasManyData);
+                $model->data = $hasManyData;
+            }
+        }
+        foreach ($model->hasAndBelongsToMany as $foreignmodel => $foreignvalues) {
+                    firecake("hasandbelongstomany");
+                    //only kick in if associated data was changed
+                    if (isset($model->data[$model->name][strtolower($foreignmodel) . '_ids'])) {
+                        //get associated ids
+                        $assocIds = $model->data[$model->name][strtolower($foreignmodel) . '_ids'];
+                        firecake($assocIds);
+                        if (is_string($assocIds)) {
+                            $assocIds = explode(",", $assocIds);
+                        }
+                        if (is_numeric($assocIds)) {
+                            $assocIds = array($assocIds);
+                        }
+                        //assemble saveAssociated data
+                        $hasManyData = array();
+                        $hasManyData[$model->name] = array('id' => $model->id);
+                        foreach ($assocIds as $entry) {
+                            $hasManyData[$foreignmodel][] = array($foreignvalues['foreignKey'] => $model->id, 'id' => $entry);
+                        }
+                        firecake("hasmanydata:");
+                        firecake($hasManyData);
+                        $model->data = $hasManyData;
+                    }
+                }
+
 
 		// start saving data
 		return true;
 	}
+
 	/**
 	 * Saves a records, either add or edit.
 	 * See $this->_defaults['useOnlyDefinedFields'] for an explanation
@@ -506,13 +661,36 @@ class BanchaRemotableBehavior extends ModelBehavior {
 			$msg =  "The record doesn't validate. Since Bancha can't send validation errors to the ".
 					"client yet, please handle this in your application stack.";
 			if(Configure::read('debug') > 0) {
-				$msg .= "<br/><br/><pre>Validation Errors:\n".print_r($model->invalidFields(),true)."</pre>";
+				$msg .= "<br/><br/><pre>Validation Errors:\n".print_r($model->name).' - '.print_r($model->invalidFields(),true)."</pre>";
 			}
 			throw new BadRequestException($msg);
 		}
-
-		$result = $model->save($model->data,$options);
-
+        firecake("saveField");
+        firecake($model->data);
+        firecake($model->id);
+		$result = $model->saveAll($model->data,$options);
+        $sources = ConnectionManager::sourceList();
+        if (!isset($logs)):
+        	$logs = array();
+        	foreach ($sources as $source):
+        		$db = ConnectionManager::getDataSource($source);
+        		$logs[$source] = $db->getLog();
+        	endforeach;
+        endif;
+        foreach ($logs as $source => $logInfo):
+        	$text = $logInfo['count'] > 1 ? 'queries' : 'query';
+        	if (function_exists('firecake')) {
+                $summery = sprintf('(%s) %s %s took %s ms', $source, $logInfo['count'], $text, $logInfo['time']);
+                $header = array("Nr", "Query", "Error", "Affected", "Num. rows", "Took (ms)");
+                $body = array($header);
+                foreach ($logInfo['log'] as $k => $i) {
+                    $row = array(($k + 1), $i['query'], (isset($i['error']) ? $i['error']: ''), $i['affected'], $i['numRows'], $i['took']);
+                    $body[] = $row;
+                    }
+                FireCake::table('FireCake Debug', $body);
+            }
+        endforeach;
+        firecake($result);
 		// set back
 		$this->settings[$this->model->alias]['useOnlyDefinedFields'] = $config;
 		return $result;
@@ -528,8 +706,11 @@ class BanchaRemotableBehavior extends ModelBehavior {
 	 */
 	public function saveFieldsAndReturn($model,$data) {
 		// save
+        firecake("before field save");
 		$this->saveFields($model,$data);
-		
+        firecake("fields saved");
+       // $this->saveAssociatedDataAndReturn($model);
+		firecake($this->getLastSaveResult());
 		// return ext-formated result
 		return $this->getLastSaveResult();
 	}
